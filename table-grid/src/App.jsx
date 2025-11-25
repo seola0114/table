@@ -1,6 +1,9 @@
 import * as React from "react";
-import { DataGrid } from "@mui/x-data-grid";
-import { Box, Button } from "@mui/material";
+import { DataGridPro } from "@mui/x-data-grid-pro";
+import { Box, Button, Stack } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
+import SaveIcon from "@mui/icons-material/Save";
 
 const columns = [
   { field: "section", headerName: "상태 그룹", width: 120 },
@@ -114,29 +117,89 @@ function DropdownCell({ value }) {
 
 export default function App() {
   const [data, setData] = React.useState(rows);
+  const [playgroundRows, setPlaygroundRows] = React.useState(rows.slice(0, 3));
+  const [selection, setSelection] = React.useState([]);
+
+  const addRow = () => {
+    const nextId = (playgroundRows[playgroundRows.length - 1]?.id ?? 0) + 1;
+    setPlaygroundRows((prev) => [
+      ...prev,
+      { id: nextId, section: "Edited", variant: "New", no: nextId, ...baseRow },
+    ]);
+  };
+
+  const deleteRows = () => {
+    setPlaygroundRows((prev) => prev.filter((r) => !selection.includes(r.id)));
+    setSelection([]);
+  };
+
+  const saveRows = () => {
+    console.log("등록 데이터", playgroundRows);
+    alert("등록 완료 (콘솔 확인)");
+  };
 
   return (
-    <Box sx={{ height: 600, width: "100%", p: 2 }}>
-      <Button variant="outlined" sx={{ mb: 1 }} onClick={() => setData(rows)}>
-        리셋
-      </Button>
-      <DataGrid
-        rows={data}
-        columns={columns}
-        checkboxSelection
-        disableRowSelectionOnClick
-        getRowClassName={({ row }) => `row-${row.section}`}
-        sx={{
-          fontFamily: "SUIT Variable",
-          "& .row-Enabled": { bgcolor: sectionColors.Enabled },
-          "& .row-Focus": { bgcolor: sectionColors.Focus },
-          "& .row-Edited": { bgcolor: sectionColors.Edited },
-          "& .row-Error": { bgcolor: sectionColors.Error },
-          "& .MuiDataGrid-columnHeaders": {
-            bgcolor: "#dee1e8", color: "#444855", fontWeight: 500, fontSize: 13
-          },
-        }}
-      />
+    <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 3 }}>
+      <Box>
+        <Button variant="outlined" sx={{ mb: 1 }} onClick={() => setData(rows)}>
+          리셋
+        </Button>
+        <DataGridPro
+          rows={data}
+          columns={columns}
+          checkboxSelection
+          disableRowSelectionOnClick
+          getRowClassName={({ row }) => `row-${row.section}`}
+          sx={{
+            fontFamily: "SUIT Variable",
+            "& .row-Enabled": { bgcolor: sectionColors.Enabled },
+            "& .row-Focus": { bgcolor: sectionColors.Focus },
+            "& .row-Edited": { bgcolor: sectionColors.Edited },
+            "& .row-Error": { bgcolor: sectionColors.Error },
+            "& .MuiDataGrid-columnHeaders": {
+              bgcolor: "#dee1e8", color: "#444855", fontWeight: 500, fontSize: 13
+            },
+            height: 640,
+          }}
+        />
+      </Box>
+
+      <Box>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+          <Stack direction="row" spacing={1}>
+            <Button startIcon={<AddIcon />} variant="outlined" onClick={addRow}>
+              행 추가
+            </Button>
+            <Button startIcon={<DeleteIcon />} variant="outlined" color="error" onClick={deleteRows}>
+              행 삭제
+            </Button>
+          </Stack>
+          <Button startIcon={<SaveIcon />} variant="contained" onClick={saveRows}>
+            등록
+          </Button>
+        </Stack>
+
+        <DataGridPro
+          rows={playgroundRows}
+          columns={columns}
+          checkboxSelection
+          disableRowSelectionOnClick
+          onRowSelectionModelChange={(ids) => setSelection(ids)}
+          rowSelectionModel={selection}
+          getRowClassName={({ row }) => `row-${row.section}`}
+          sx={{
+            fontFamily: "SUIT Variable",
+            "& .row-Enabled": { bgcolor: sectionColors.Enabled },
+            "& .row-Focus": { bgcolor: sectionColors.Focus },
+            "& .row-Edited": { bgcolor: sectionColors.Edited },
+            "& .row-Error": { bgcolor: sectionColors.Error },
+            "& .MuiDataGrid-columnHeaders": {
+              bgcolor: "#dee1e8", color: "#444855", fontWeight: 500, fontSize: 13
+            },
+            height: 500,
+          }}
+        />
+      </Box>
     </Box>
   );
 }
