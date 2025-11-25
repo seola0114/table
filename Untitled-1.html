@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>Editable Grid States</title>
+  <style>
+    :root {
+      --bg-page: #f7f8fb;
+      --bg-surface: #ffffff;
+      --border: #d7dce4;
+      --text: #9ea4b1;
+      --muted: #9ea4b1;
+      --header: #f1f5f9;
+
+      --enabled: #fff;
+      --focus: #e8f2ff;
+      --edited: #fff7e7;
+      --error: #ffefef;
+      --state-head: #414854;
+
+      --chip-enabled: #1d4ed8;
+      --chip-focus: #0ea5e9;
+      --chip-edited: #d97706;
+      --chip-error: #dc2626;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "SUIT Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      background: var(--bg-page);
+      color: var(--text);
+    }
+
+    .app {
+      padding: 24px;
+    }
+
+    .shell {
+      background: var(--bg-surface);
+      border-radius: 16px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+      padding: 16px 16px 20px;
+      margin-bottom: 16px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .title {
+      font-size: 14px;
+      font-weight: 400;
+    }
+
+    .subtitle {
+      margin-top: 2px;
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    .chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      font-size: 11px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: #f9fafb;
+      border: 1px solid var(--border);
+      color: #000;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+    }
+
+    .chip-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .chip[data-filter="enabled"] .chip-dot { background: var(--chip-enabled); }
+    .chip[data-filter="focus"]   .chip-dot { background: var(--chip-focus); }
+    .chip[data-filter="edited"]  .chip-dot { background: var(--chip-edited); }
+    .chip[data-filter="error"]   .chip-dot { background: var(--chip-error); }
+
+    .chip.is-active {
+      color: #0f172a;
+      background: #e5f0ff;
+      border-color: #bfdbfe;
+      font-weight: 400;
+    }
+
+    .chip[data-filter="all"].is-active {
+      background: #111827;
+      color: #f9fafb;
+      border-color: #111827;
+    }
+
+    .table-container {
+      overflow-x: auto;
+      overflow-y: visible;
+      max-height: none;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    table {
+      border-collapse: collapse;
+      min-width: 2000px;
+      width: 100%;
+      font-size: 12px;
+    }
+
+    thead {
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      background: var(--header);
+    }
+
+    th, td {
+      border: 1px solid var(--border);
+      padding: 8px 10px;
+      white-space: nowrap;
+      text-align: left;
+    }
+
+    /* Body5 스타일 적용 */
+    td {
+      color: var(--Colors-grey-60, #9ea4b1);
+      font-family: "SUIT Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 13px;
+      font-style: normal;
+      font-weight: 500;
+      line-height: 20px;
+    }
+
+    th {
+      font-weight: 400;
+      font-size: 11px;
+      color: #444855;
+    }
+
+    th.top-label {
+      background: var(--header);
+      color: #000;
+      text-align: center;
+      font-weight: 400;
+      letter-spacing: 0.2px;
+    }
+
+    /* 테스트 테이블 전용 폭 */
+    .test-table {
+      min-width: 700px;
+      width: auto;
+    }
+
+    .test-actions {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .btn {
+      padding: 6px 10px;
+      border: 1px solid #d7dce4;
+      border-radius: 6px;
+      background: #f8fafc;
+      color: #16171b;
+      font-family: "SUIT Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.12s ease, border-color 0.12s ease;
+    }
+
+    .btn:hover {
+      background: #e5eefc;
+      border-color: #c3d4f5;
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+
+    .modal {
+      background: #fff;
+      border-radius: 12px;
+      padding: 16px;
+      min-width: 260px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.18);
+      border: 1px solid #e5e7eb;
+      font-family: "SUIT Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    }
+
+    .modal h3 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      color: #16171b;
+      font-weight: 500;
+    }
+
+    .modal p {
+      margin: 0 0 12px;
+      font-size: 12px;
+      color: #555b67;
+      line-height: 18px;
+    }
+
+    .modal .btn-row {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 12px 24px;
+      background: #edf7f4;
+      box-shadow: 0px 5px 5px rgba(17, 162, 119, 0.15);
+      border-radius: 9999px;
+      outline: 1px solid #11a277;
+      outline-offset: -1px;
+      color: #11a277;
+      font-size: 14px;
+      font-family: "SUIT Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-weight: 700;
+      line-height: 20px;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      z-index: 3000;
+      opacity: 0;
+      pointer-events: none;
+      transform-origin: center;
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .toast-icon {
+      width: 20px;
+      height: 20px;
+      display: inline-block;
+      background-image: url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M9.99996 1.66666C5.39996 1.66666 1.66663 5.39999 1.66663 9.99999C1.66663 14.6 5.39996 18.3333 9.99996 18.3333C14.6 18.3333 18.3333 14.6 18.3333 9.99999C18.3333 5.39999 14.6 1.66666 9.99996 1.66666ZM14.9416 7.66666L8.48329 14.1333C8.39996 14.2083 8.26663 14.2083 8.18329 14.1333L5.05829 11C4.98329 10.925 4.98329 10.7917 5.05829 10.7083L5.70829 10.0583C5.79163 9.98332 5.92496 9.98332 5.99996 10.0583L8.39163 12.4417L14 6.72499C14.075 6.64999 14.2083 6.64999 14.2916 6.72499L14.9416 7.37499C15.0166 7.45832 15.0166 7.59166 14.9416 7.66666Z' fill='%2311A277'/%3E%3C/svg%3E");
+      background-size: cover;
+      background-repeat: no-repeat;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+      pointer-events: auto;
+    }
+
+    tbody tr {
+      transition: background 0.12s ease;
+    }
+
+    tbody tr:hover {
+      background: #e5e7eb55;
+    }
+
+    /* 상태별 행 배경 */
+    tbody tr[data-section="enabled"] { background: var(--enabled); }
+    tbody tr[data-section="focus"]   { background: var(--focus); }
+    tbody tr[data-section="edited"]  { background: var(--edited); }
+    tbody tr[data-section="error"]   { background: var(--error); }
+
+    /* Enabled + Dropdown */
+    .enabled-dropdown {
+      border-right: 1px solid var(--Colors-black_opacity-black_opacity8, rgba(22, 23, 27, 0.08));
+      border-bottom: 1px solid var(--Colors-black_opacity-black_opacity8, rgba(22, 23, 27, 0.08));
+      background: var(--Semantic-Static-white, #fff);
+    }
+
+    /* sticky 컬럼 (상태 그룹 / 상태) */
+    th.sticky,
+    td.sticky {
+      position: sticky;
+      left: 0;
+      z-index: 2;
+      background: inherit;
+    }
+
+    th.sticky-2,
+    td.sticky-2 {
+      position: sticky;
+      left: 120px; /* 첫 번째 sticky width 와 맞추기 */
+      z-index: 2;
+      background: inherit;
+    }
+
+    th.sticky:not(.top-label),
+    th.sticky-2 {
+      z-index: 4; /* 헤더가 body 위에 오도록 */
+      background: var(--header);
+    }
+
+    .state-group {
+      font-weight: 400;
+      font-size: 12px;
+      background: #f0f2f5;
+      color: #000;
+      text-align: center;
+      letter-spacing: 0.1px;
+    }
+
+    .state-variant {
+      font-size: 11px;
+      color: #374151;
+      background: #f8fafc;
+      border-right: 1px solid rgba(22, 23, 27, 0.08);
+    }
+
+    tbody tr[data-section="enabled"] .state-variant { background: #dfeafe; }
+    tbody tr[data-section="focus"]   .state-variant { background: #dbeafe; }
+    tbody tr[data-section="edited"]  .state-variant { background: #fff1d6; }
+    tbody tr[data-section="error"]   .state-variant { background: #ffe1e5; }
+
+    .state-variant small {
+      display: block;
+      color: #6b7280;
+      font-size: 10px;
+    }
+
+    .checkbox-cell {
+      text-align: center;
+      width: 80px;
+      background: #f8fafc;
+      border-right: 1px solid rgba(22, 23, 27, 0.08);
+    }
+
+    .checkbox-cell input {
+      appearance: none;
+      width: 16px;
+      height: 16px;
+      border-radius: 4px;
+      border: 1px solid #b6bcc8;
+      background: #fff;
+      cursor: pointer;
+      display: inline-block;
+      transition: background 0.12s ease, border-color 0.12s ease;
+      background-repeat: no-repeat;
+      background-position: center;
+      background-size: 12px 12px;
+      outline: none;
+    }
+
+    .checkbox-cell input:hover:not(:checked) {
+      border: 1px solid #b6bcc8;
+      background: #f5f7fc;
+    }
+
+    .checkbox-cell input:checked {
+      border: 1px solid var(--Colors-blue-40, #2065cc);
+      background: var(--Colors-blue-50, #287eff);
+      outline: 1px solid var(--Colors-blue-40, #2065cc);
+      outline-offset: -1px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M6.55 11.2835L4.05 8.79182C3.98333 8.72537 3.98333 8.6257 4.05 8.55926L4.57 8.04098C4.63667 7.97454 4.73667 7.97454 4.80333 8.04098L6.71 9.94132L11.1967 5.38318C11.2633 5.31673 11.3633 5.31673 11.43 5.38318L11.95 5.90145C12.0167 5.96789 12.0167 6.06756 11.95 6.13401L6.78333 11.2835C6.71667 11.35 6.61667 11.35 6.55 11.2835Z' fill='white'/%3E%3C/svg%3E");
+    }
+
+    .checkbox-cell input:checked:hover {
+      border: 1px solid var(--Colors-blue-30, #184c99);
+      background: var(--Colors-blue-40, #2065cc);
+      outline: 1px solid var(--Colors-blue-30, #184c99);
+      outline-offset: -1px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M6.55 11.2835L4.05 8.79182C3.98333 8.72537 3.98333 8.6257 4.05 8.55926L4.57 8.04098C4.63667 7.97454 4.73667 7.97454 4.80333 8.04098L6.71 9.94132L11.1967 5.38318C11.2633 5.31673 11.3633 5.31673 11.43 5.38318L11.95 5.90145C12.0167 5.96789 12.0167 6.06756 11.95 6.13401L6.78333 11.2835C6.71667 11.35 6.61667 11.35 6.55 11.2835Z' fill='white'/%3E%3C/svg%3E");
+    }
+
+    /* Error 상태 체크박스 */
+    tr[data-section="error"] .checkbox-cell input:checked {
+      border: 1px solid #b0200a;
+      background: #dc0c0c;
+      outline: 1px solid #b0200a;
+      outline-offset: -1px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M6.55 11.2835L4.05 8.79179C3.98333 8.72534 3.98333 8.62567 4.05 8.55923L4.57 8.04095C4.63667 7.97451 4.73667 7.97451 4.80333 8.04095L6.71 9.94129L11.1967 5.38315C11.2633 5.3167 11.3633 5.3167 11.43 5.38315L11.95 5.90142C12.0167 5.96786 12.0167 6.06753 11.95 6.13398L6.78333 11.2835C6.71667 11.3499 6.61667 11.3499 6.55 11.2835Z' fill='white'/%3E%3C/svg%3E");
+    }
+
+    tr[data-section="error"] .checkbox-cell input:checked:hover {
+      border: 1px solid #b0200a;
+      background: #dc0c0c;
+      outline: 1px solid #b0200a;
+      outline-offset: -1px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'%3E%3Cpath d='M6.55 11.2835L4.05 8.79179C3.98333 8.72534 3.98333 8.62567 4.05 8.55923L4.57 8.04095C4.63667 7.97451 4.73667 7.97451 4.80333 8.04095L6.71 9.94129L11.1967 5.38315C11.2633 5.3167 11.3633 5.3167 11.43 5.38315L11.95 5.90142C12.0167 5.96786 12.0167 6.06753 11.95 6.13398L6.78333 11.2835C6.71667 11.3499 6.61667 11.3499 6.55 11.2835Z' fill='white'/%3E%3C/svg%3E");
+    }
+
+    /* Base tint for checkbox/No. by section */
+    tr[data-section="enabled"] .checkbox-cell,
+    tr[data-section="enabled"] .number-cell { background: #fff; }
+    tr[data-section="focus"] .checkbox-cell,
+    tr[data-section="focus"] .number-cell { background: #f0f6ff; }
+    tr[data-section="edited"] .checkbox-cell,
+    tr[data-section="edited"] .number-cell { background: #fef6e6; }
+    tr[data-section="error"] .checkbox-cell,
+    tr[data-section="error"] .number-cell { background: #fff0f0; }
+
+    /* Hover row tint override */
+    tr.is-hover .checkbox-cell,
+    tr.is-hover .number-cell { background: #edeff5; }
+    tr[data-section="enabled"].is-hover td,
+    tr[data-section="enabled"].is-hover .cell,
+    tr[data-section="enabled"].is-hover .dropdown-cell {
+      background: linear-gradient(0deg, hsla(220, 8%, 56%, 0.06) 0%, hsla(220, 8%, 56%, 0.06) 100%), var(--enabled);
+      border-right: 1px solid var(--Colors-black_opacity-black_opacity8, rgba(22, 23, 27, 0.08));
+      border-bottom: 1px solid var(--Colors-black_opacity-black_opacity8, rgba(22, 23, 27, 0.08));
+    }
+    /* Enabled + Checked + Hover overlay */
+    tr[data-section="enabled"].is-checked.is-hover td,
+    tr[data-section="enabled"].is-checked.is-hover .cell,
+    tr[data-section="enabled"].is-checked.is-hover .dropdown-cell {
+      background: linear-gradient(0deg, hsla(220, 8%, 56%, 0.06) 0%, hsla(220, 8%, 56%, 0.06) 100%), hsla(216, 100%, 58%, 0.12);
+      border-right: 1px solid rgba(22, 23, 27, 0.08);
+      border-bottom: 1px solid rgba(22, 23, 27, 0.08);
+    }
+    tr[data-section="error"].is-hover td,
+    tr[data-section="error"].is-hover .cell,
+    tr[data-section="error"].is-hover .dropdown-cell {
+      background: linear-gradient(0deg, hsla(220, 8%, 56%, 0.06) 0%, hsla(220, 8%, 56%, 0.06) 100%), #fff0f0;
+      border-right: 1px solid rgba(22, 23, 27, 0.08);
+      border-bottom: 1px solid rgba(22, 23, 27, 0.08);
+    }
+    tr[data-section="edited"].is-hover td,
+    tr[data-section="edited"].is-hover .cell,
+    tr[data-section="edited"].is-hover .dropdown-cell {
+      background: linear-gradient(0deg, hsla(220, 8%, 56%, 0.06) 0%, hsla(220, 8%, 56%, 0.06) 100%), #fff7e7;
+      border-right: 1px solid rgba(22, 23, 27, 0.08);
+      border-bottom: 1px solid rgba(22, 23, 27, 0.08);
+    }
+    tr[data-section="focus"].is-hover td,
+    tr[data-section="focus"].is-hover .cell,
+    tr[data-section="focus"].is-hover .dropdown-cell {
+      background: linear-gradient(0deg, hsla(220, 8%, 56%, 0.06) 0%, hsla(220, 8%, 56%, 0.06) 100%), #e8f2ff;
+      border-right: 1px solid rgba(22, 23, 27, 0.08);
+      border-bottom: 1px solid rgba(22, 23, 27, 0.08);
+    }
+
+    /* Focus + Checked + Hover overlay */
+    tr[data-section="focus"].is-checked.is-hover td,
+    tr[data-section="focus"].is-checked.is-hover .cell,
+    tr[data-section="focus"].is-checked.is-hover .dropdown-cell {
+      background: linear-gradient(0deg, hsla(220, 8%, 56%, 0.06) 0%, hsla(220, 8%, 56%, 0.06) 100%), hsla(216, 100%, 58%, 0.12);
+      border-right: 1px solid rgba(22, 23, 27, 0.08);
+      border-bottom: 1px solid rgba(22, 23, 27, 0.08);
+    }
+    /* Checked dropdowns follow section base color */
+    tr.is-checked[data-section="enabled"] .dropdown-cell { background: var(--enabled); }
+    tr.is-checked[data-section="focus"]   .dropdown-cell { background: var(--focus); }
+    tr.is-checked[data-section="edited"]  .dropdown-cell { background: var(--edited); }
+    tr.is-checked[data-section="error"]   .dropdown-cell { background: var(--error); }
+    /* Checked + Hover dropdowns overlay on section color */
+    tr.is-checked.is-hover[data-section="enabled"] .dropdown-cell {
+      background: linear-gradient(0deg, hsla(220, 8%, 56%, 0.06) 0%, hsla(220, 8%, 56%, 0.06) 100%), var(--enabled);
+    }
+    tr.is-checked.is-hover[data-section="focus"] .dropdown-cell {
+      background: linear-gradient(0deg, hsla(220, 8%, 56%, 0.06) 0%, hsla(220, 8%, 56%, 0.06) 100%), var(--focus);
+    }
+    tr.is-checked.is-hover[data-section="edited"] .dropdown-cell {
+      background: linear-gradient(0deg, hsla(220, 8%, 56%, 0.06) 0%, hsla(220, 8%, 56%, 0.06) 100%), var(--edited);
+    }
+    tr.is-checked.is-hover[data-section="error"] .dropdown-cell {
+      background: linear-gradient(0deg, hsla(220, 8%, 56%, 0.06) 0%, hsla(220, 8%, 56%, 0.06) 100%), var(--error);
+    }
+
+    /* Checked rows: unify td backgrounds (except Edited/Error) */
+    tr.is-checked[data-section="enabled"] td,
+    tr.is-checked[data-section="focus"] td {
+      background: hsla(216, 100%, 58%, 0.12);
+      border-right: 1px solid rgba(22, 23, 27, 0.08);
+      border-bottom: 1px solid rgba(22, 23, 27, 0.08);
+    }
+    tr.is-checked[data-section="enabled"] .cell,
+    tr.is-checked[data-section="enabled"] .dropdown-cell,
+    tr.is-checked[data-section="focus"] .cell,
+    tr.is-checked[data-section="focus"] .dropdown-cell {
+      background: hsla(216, 100%, 58%, 0.12);
+      border-right: 1px solid rgba(22, 23, 27, 0.08);
+      border-bottom: 1px solid rgba(22, 23, 27, 0.08);
+    }
+
+    /* Keep Editable Grid column static (no hover/check tint) */
+    tr.is-checked[data-section="enabled"] .state-group,
+    tr.is-checked[data-section="focus"] .state-group,
+    tr.is-hover .state-group {
+      background: #f0f2f5;
+      color: #000;
+      border-right: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+
+    /* Enabled + Checked checkbox cell tint */
+    tr[data-section="enabled"].is-checked .checkbox-cell {
+      background: hsla(216, 100%, 58%, 0.12);
+      border-right: 1px solid rgba(22, 23, 27, 0.08);
+      border-bottom: 1px solid rgba(22, 23, 27, 0.08);
+    }
+    tr[data-section="enabled"].is-checked .number-cell {
+      background: hsla(216, 100%, 58%, 0.12);
+      border-right: 1px solid rgba(22, 23, 27, 0.08);
+      border-bottom: 1px solid rgba(22, 23, 27, 0.08);
+    }
+    tr[data-section="enabled"].is-checked .dropdown-cell {
+      background: hsla(216, 100%, 58%, 0.12);
+      border-right: 1px solid rgba(22, 23, 27, 0.08);
+      border-bottom: 1px solid rgba(22, 23, 27, 0.08);
+    }
+
+    /* Focus + Checked checkbox cell tint */
+    tr[data-section="focus"].is-checked .checkbox-cell {
+      background: rgba(40, 126, 255, 0.18);
+      border-right: 1px solid rgba(22, 23, 27, 0.08);
+      border-bottom: 1px solid rgba(22, 23, 27, 0.08);
+    }
+    tr[data-section="focus"].is-checked .number-cell {
+      background: rgba(40, 126, 255, 0.18);
+      border-right: 1px solid rgba(22, 23, 27, 0.08);
+      border-bottom: 1px solid rgba(22, 23, 27, 0.08);
+    }
+
+    /* Edited + Checked checkbox cell tint */
+    tr[data-section="edited"].is-checked .checkbox-cell {
+      background: #fef6e6;
+      border-right: 1px solid rgba(22, 23, 27, 0.08);
+      border-bottom: 1px solid rgba(22, 23, 27, 0.08);
+    }
+    tr[data-section="edited"].is-checked .number-cell {
+      background: #fef6e6;
+      border-right: 1px solid rgba(22, 23, 27, 0.08);
+      border-bottom: 1px solid rgba(22, 23, 27, 0.08);
+    }
+
+    /* Error + Checked checkbox cell tint */
+    tr[data-section="error"].is-checked .checkbox-cell {
+      background: #fff0f0;
+      border-right: 1px solid rgba(22, 23, 27, 0.08);
+      border-bottom: 1px solid rgba(22, 23, 27, 0.08);
+    }
+    tr[data-section="error"].is-checked .number-cell {
+      background: #fff0f0;
+      border-right: 1px solid rgba(22, 23, 27, 0.08);
+      border-bottom: 1px solid rgba(22, 23, 27, 0.08);
+    }
+
+    .number-cell {
+      text-align: right;
+      width: 80px;
+      color: #16171b;
+      font-weight: 500;
+      background: #f8fafc;
+      border-right: 1px solid rgba(22, 23, 27, 0.08);
+    }
+
+    .badge {
+      display: inline-flex;
+      padding: 2px 6px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 400;
+      background: #e5e7eb;
+      color: #374151;
+    }
+
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+
+    /* Enabled Default input cell */
+    .cell {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 6px 12px;
+      min-width: 160px;
+      background: #fff;
+      border-right: 1px solid rgba(22, 23, 27, 0.08);
+      border-bottom: 1px solid rgba(22, 23, 27, 0.08);
+    }
+
+    .cell-text {
+      flex: 1 1 0;
+      color: var(--Colors-grey-60, #9ea4b1);
+      font-size: 13px;
+      font-family: "SUIT Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-weight: 500;
+      line-height: 20px;
+      word-wrap: break-word;
+    }
+
+    /* Dropdown cell for 비용항목 */
+    .dropdown-cell {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      width: 100px;
+      background: #fff;
+      border-right: 1px solid rgba(22, 23, 27, 0.08);
+      border-bottom: 1px solid rgba(22, 23, 27, 0.08);
+    }
+
+    .dropdown-text {
+      flex: 1 1 0;
+      color: #16171b;
+      font-size: 13px;
+      font-family: "SUIT Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-weight: 500;
+      line-height: 20px;
+      word-wrap: break-word;
+    }
+
+    .dropdown-arrow {
+      width: 20px;
+      height: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .dropdown-arrow::after {
+      content: "";
+      position: absolute;
+      width: 9.52px;
+      height: 5.72px;
+      left: 5.24px;
+      top: 7.5px;
+      background: #9ea4b1;
+      clip-path: polygon(0 0, 100% 0, 50% 100%);
+    }
+
+    /* Dropdown 리스트 */
+    .dropdown-menu {
+      position: absolute;
+      z-index: 999;
+      min-width: 140px;
+      max-width: 452px;
+      max-height: 546px;
+      padding: 4px;
+      background: #fff;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+      border-radius: 6px;
+      outline: 1px solid #c9cdd7;
+      outline-offset: -1px;
+      overflow: auto;
+      display: none;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .dropdown-option {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      padding: 6px 8px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: "SUIT Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: #16171b;
+      line-height: 20px;
+      transition: background 0.12s ease;
+    }
+
+    .dropdown-option:hover {
+      background: #f5f7fc;
+    }
+
+    .dropdown-option.is-selected {
+      background: #f5f7fc;
+      color: #287eff;
+    }
+    /* 비용항목 드롭다운 기본 배경을 상태 색상으로 */
+    tr[data-section="enabled"]:not(.is-checked) .dropdown-cell { background: var(--enabled); }
+    tr[data-section="focus"]:not(.is-checked)   .dropdown-cell { background: var(--focus); }
+    tr[data-section="edited"]:not(.is-checked)  .dropdown-cell { background: var(--edited); }
+    tr[data-section="error"]:not(.is-checked)   .dropdown-cell { background: var(--error); }
+
+    /* Enabled + Checked + Hover dropdown tint */
+    tr[data-section="enabled"].is-checked.is-hover .dropdown-cell {
+      background: linear-gradient(0deg, rgba(22, 23, 27, 0.06) 0%, rgba(22, 23, 27, 0.06) 100%), hsla(216, 100%, 58%, 0.12);
+      border-right: 1px solid rgba(22, 23, 27, 0.08);
+      border-bottom: 1px solid rgba(22, 23, 27, 0.08);
+    }
+
+    /* Enabled + Default row stays white */
+    tr[data-section="enabled"].is-default td,
+    tr[data-section="enabled"].is-default .cell,
+    tr[data-section="enabled"].is-default .dropdown-cell {
+      background: #fff;
+      border-right: 1px solid rgba(22, 23, 27, 0.08);
+      border-bottom: 1px solid rgba(22, 23, 27, 0.08);
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="shell">
+      <div class="header">
+        <div>
+          <div class="title">상태값 가이드 테이블</div>
+          <div class="subtitle">Enabled / Focus / Edited / Error 시나리오 참고용</div>
+        </div>
+        <div class="chips">
+          <div class="chip is-active" data-filter="all">
+            <span class="chip-dot" style="background:#9ca3af;"></span>
+            전체
+          </div>
+          <div class="chip" data-filter="enabled">
+            <span class="chip-dot"></span>
+            Enabled
+          </div>
+          <div class="chip" data-filter="focus">
+            <span class="chip-dot"></span>
+            Focus
+          </div>
+          <div class="chip" data-filter="edited">
+            <span class="chip-dot"></span>
+            Edited
+          </div>
+          <div class="chip" data-filter="error">
+            <span class="chip-dot"></span>
+            Error
+          </div>
+      </div>
+    </div>
+
+    <!-- 테스트용 미니 테이블 -->
+    <div class="shell" style="margin-top:16px;">
+      <div class="header">
+        <div>
+          <div class="title">테스트 플레이그라운드</div>
+          <div class="subtitle">Enabled 상태에서 체크/저장/삭제, 행 추가 → Error/Edited 흐름 테스트</div>
+        </div>
+      </div>
+      <div class="test-actions">
+        <button class="btn" id="add-row">행 추가 (Edited)</button>
+        <button class="btn" id="delete-rows">행 삭제</button>
+        <button class="btn" id="save-rows">저장</button>
+      </div>
+      <div class="table-container">
+        <table class="test-table" aria-label="테스트용 미니 테이블">
+          <thead>
+          <tr>
+            <th class="sticky" style="min-width:120px;">상태 그룹</th>
+            <th class="sticky-2" style="min-width:140px;">상태</th>
+            <th class="checkbox-cell">선택</th>
+            <th class="number-cell">No.</th>
+            <th>비용항목</th>
+            <th>상차지</th>
+            <th>하차지</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr data-section="enabled" data-filled="true">
+            <td class="sticky state-group">Enabled</td>
+            <td class="sticky-2 state-variant">Enabled</td>
+            <td class="checkbox-cell"><input type="checkbox" /></td>
+            <td class="number-cell">1</td>
+            <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
+            <td><div class="cell"><div class="cell-text" contenteditable="true">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text" contenteditable="true">입력</div></div></td>
+          </tr>
+          <tr data-section="enabled" data-filled="true">
+            <td class="sticky state-group">Enabled</td>
+            <td class="sticky-2 state-variant">Enabled</td>
+            <td class="checkbox-cell"><input type="checkbox" /></td>
+            <td class="number-cell">2</td>
+            <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
+            <td><div class="cell"><div class="cell-text" contenteditable="true">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text" contenteditable="true">입력</div></div></td>
+          </tr>
+          <tr data-section="enabled" data-filled="true">
+            <td class="sticky state-group">Enabled</td>
+            <td class="sticky-2 state-variant">Enabled</td>
+            <td class="checkbox-cell"><input type="checkbox" /></td>
+            <td class="number-cell">3</td>
+            <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
+            <td><div class="cell"><div class="cell-text" contenteditable="true">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text" contenteditable="true">입력</div></div></td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+      <div class="table-container">
+        <table aria-label="Editable Grid 상태 정의">
+          <thead>
+          <tr>
+            <th class="sticky top-label" style="min-width:120px;">Editable Grid</th>
+            <th class="sticky-2" style="min-width:100px;">상태</th>
+            <th class="checkbox-cell"></th>
+            <th class="number-cell">No.</th>
+            <th>비용항목</th>
+            <th>상차지</th>
+            <th>하차지</th>
+            <th>모달 구분</th>
+            <th>자동</th>
+            <th>1.5ton</th>
+            <th>2.5ton</th>
+            <th>5ton</th>
+            <th>8ton</th>
+            <th>기타 옵션</th>
+          </tr>
+          </thead>
+          <tbody>
+
+          <!-- Enabled -->
+          <tr data-section="enabled" class="is-default">
+            <td rowspan="4" class="sticky state-group">Enabled</td>
+            <td class="sticky-2 state-variant">Enabled</td>
+            <td class="checkbox-cell"><input type="checkbox" /></td>
+            <td class="number-cell">1</td>
+            <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">대장</div></div></td>
+            <td><div class="cell"><div class="cell-text">자동</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td class="mono">…</td>
+          </tr>
+          <tr data-section="enabled" class="is-hover">
+            <td class="sticky-2 state-variant">Enabled + Hover</td>
+            <td class="checkbox-cell"><input type="checkbox" /></td>
+            <td class="number-cell">2</td>
+            <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>대장</td>
+            <td>자동</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td class="mono">…</td>
+          </tr>
+          <tr data-section="enabled" class="is-checked">
+            <td class="sticky-2 state-variant">Enabled + Checked</td>
+            <td class="checkbox-cell"><input type="checkbox" checked /></td>
+            <td class="number-cell">3</td>
+            <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>대장</td>
+            <td>자동</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td class="mono">…</td>
+          </tr>
+          <tr data-section="enabled" class="is-checked is-hover">
+            <td class="sticky-2 state-variant">Enabled + Checked + Hover</td>
+            <td class="checkbox-cell"><input type="checkbox" checked /></td>
+            <td class="number-cell">4</td>
+            <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>대장</td>
+            <td>자동</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td class="mono">…</td>
+          </tr>
+
+          <!-- Focus -->
+          <tr data-section="focus">
+            <td rowspan="3" class="sticky state-group">Focus</td>
+            <td class="sticky-2 state-variant">Default</td>
+            <td class="checkbox-cell"><input type="checkbox" /></td>
+            <td class="number-cell">5</td>
+            <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>대장</td>
+            <td>자동</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td class="mono">…</td>
+          </tr>
+          <tr data-section="focus" class="is-checked">
+            <td class="sticky-2 state-variant">Checked</td>
+            <td class="checkbox-cell"><input type="checkbox" checked /></td>
+            <td class="number-cell">6</td>
+            <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>대장</td>
+            <td>자동</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td class="mono">…</td>
+          </tr>
+          <tr data-section="focus" class="is-hover">
+            <td class="sticky-2 state-variant">Hover</td>
+            <td class="checkbox-cell"><input type="checkbox" /></td>
+            <td class="number-cell">7</td>
+            <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>대장</td>
+            <td>자동</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td class="mono">…</td>
+          </tr>
+
+          <!-- Edited -->
+          <tr data-section="edited">
+            <td rowspan="3" class="sticky state-group">Edited</td>
+            <td class="sticky-2 state-variant">Default</td>
+            <td class="checkbox-cell"><input type="checkbox" /></td>
+            <td class="number-cell">8</td>
+            <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>대장</td>
+            <td>자동</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td class="mono">…</td>
+          </tr>
+          <tr data-section="edited" class="is-checked">
+            <td class="sticky-2 state-variant">Checked</td>
+            <td class="checkbox-cell"><input type="checkbox" checked /></td>
+            <td class="number-cell">9</td>
+            <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>대장</td>
+            <td>자동</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td class="mono">…</td>
+          </tr>
+          <tr data-section="edited" class="is-hover">
+            <td class="sticky-2 state-variant">Hover</td>
+            <td class="checkbox-cell"><input type="checkbox" /></td>
+            <td class="number-cell">10</td>
+            <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>대장</td>
+            <td>자동</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td class="mono">…</td>
+          </tr>
+
+          <!-- Error -->
+          <tr data-section="error">
+            <td rowspan="3" class="sticky state-group">Error</td>
+            <td class="sticky-2 state-variant">Default</td>
+            <td class="checkbox-cell"><input type="checkbox" /></td>
+            <td class="number-cell">11</td>
+            <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>대장</td>
+            <td>자동</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td class="mono">…</td>
+          </tr>
+          <tr data-section="error" class="is-checked">
+            <td class="sticky-2 state-variant">Checked</td>
+            <td class="checkbox-cell"><input type="checkbox" checked /></td>
+            <td class="number-cell">12</td>
+            <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>대장</td>
+            <td>자동</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td class="mono">…</td>
+          </tr>
+          <tr data-section="error" class="is-hover">
+            <td class="sticky-2 state-variant">Hover</td>
+            <td class="checkbox-cell"><input type="checkbox" /></td>
+            <td class="number-cell">13</td>
+            <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>대장</td>
+            <td>자동</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td>입력</td>
+            <td class="mono">…</td>
+          </tr>
+
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">
+    <span class="toast-icon" aria-hidden="true"></span>
+    <span id="toast-text">삭제했습니다.</span>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-backdrop" id="modal">
+    <div class="modal">
+      <h3>삭제할 수 없습니다</h3>
+      <p>Enabled 상태의 행은 삭제할 수 없습니다. Edited 상태의 행만 삭제 가능합니다.</p>
+      <div class="btn-row">
+        <button class="btn" id="modal-close">확인</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 상태 필터 버튼 동작
+    const chips = document.querySelectorAll('.chip');
+    const rows = document.querySelectorAll('tbody tr[data-section]');
+
+    chips.forEach(chip => {
+      chip.addEventListener('click', () => {
+        const filter = chip.dataset.filter;
+
+        chips.forEach(c => c.classList.remove('is-active'));
+        chip.classList.add('is-active');
+
+        rows.forEach(row => {
+          if (filter === 'all') {
+            row.style.display = '';
+          } else {
+            row.style.display =
+              row.dataset.section === filter ? '' : 'none';
+          }
+        });
+      });
+    });
+
+    // Hover 시 hover 디자인 적용
+    rows.forEach(row => {
+      row.addEventListener('mouseenter', () => row.classList.add('is-hover'));
+      row.addEventListener('mouseleave', () => row.classList.remove('is-hover'));
+    });
+
+    // 테스트 테이블 동작
+    const testTable = document.querySelector('.test-table tbody');
+    const addRowBtn = document.getElementById('add-row');
+    const deleteBtn = document.getElementById('delete-rows');
+    const saveBtn = document.getElementById('save-rows');
+    const modal = document.getElementById('modal');
+    const modalClose = document.getElementById('modal-close');
+    const toast = document.getElementById('toast');
+    const toastText = document.getElementById('toast-text');
+    const testRows = () => Array.from(testTable.querySelectorAll('tr'));
+    const dropdownOptions = ['전체', 'CL1', '기타'];
+    let dropdownMenu;
+
+    const updateRowClasses = row => {
+      const checkbox = row.querySelector('.checkbox-cell input');
+      if (checkbox.checked) row.classList.add('is-checked');
+      else row.classList.remove('is-checked');
+      row.classList.remove('is-hover'); // hover 상태 비활성
+    };
+
+    const reindexRows = () => {
+      testRows().forEach((row, idx) => {
+        const numCell = row.querySelector('.number-cell');
+        if (numCell) numCell.textContent = idx + 1;
+      });
+    };
+
+    // 클릭 시 체크 토글 (Enabled -> Checked)
+    testTable.addEventListener('click', e => {
+      const row = e.target.closest('tr');
+      if (!row) return;
+      const checkbox = row.querySelector('.checkbox-cell input');
+      if (!checkbox) return;
+
+      const clickedCheckbox = e.target.closest('input[type="checkbox"]');
+      if (clickedCheckbox) {
+        // 기본 체크 동작 후 상태 반영만
+        setTimeout(() => updateRowClasses(row), 0);
+      } else {
+        // 행 클릭으로 토글
+        checkbox.checked = !checkbox.checked;
+        updateRowClasses(row);
+      }
+      reindexRows();
+    });
+
+    // 행 추가 (Edited, 비워둔 셀)
+    addRowBtn.addEventListener('click', () => {
+      const nextNo = testRows().length + 1;
+      const row = document.createElement('tr');
+      row.dataset.section = 'edited';
+      row.dataset.filled = 'false';
+      row.innerHTML = `
+        <td class="sticky state-group">Edited</td>
+        <td class="sticky-2 state-variant">Edited</td>
+        <td class="checkbox-cell"><input type="checkbox"></td>
+        <td class="number-cell">${nextNo}</td>
+        <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
+        <td><div class="cell"><div class="cell-text" contenteditable="true"></div></div></td>
+        <td><div class="cell"><div class="cell-text" contenteditable="true"></div></div></td>
+      `;
+      testTable.prepend(row);
+      updateRowClasses(row);
+      reindexRows();
+    });
+
+    // 저장 시 비어있는 행은 Error로 전환
+    saveBtn.addEventListener('click', () => {
+      testRows().forEach(row => {
+        const cells = row.querySelectorAll('.cell-text');
+        const hasEmpty = Array.from(cells).some(c => !c.textContent.trim());
+        if (hasEmpty) {
+          row.dataset.section = 'error';
+          row.dataset.filled = 'false';
+        } else {
+          // 채워진 경우 Checked 상태 유지하면서 Enabled/Edited 유지
+          if (row.dataset.section === 'error') row.dataset.section = 'enabled';
+          row.dataset.filled = 'true';
+        }
+        updateRowClasses(row);
+      });
+      reindexRows();
+    });
+
+    // 선택 삭제
+    deleteBtn.addEventListener('click', () => {
+      const rowsArr = testRows();
+      const hasCheckedEnabled = rowsArr.some(row => {
+        const checkbox = row.querySelector('.checkbox-cell input');
+        return checkbox && checkbox.checked && row.dataset.section === 'enabled';
+      });
+
+      if (hasCheckedEnabled) {
+        modal.style.display = 'flex';
+        return;
+      }
+
+      rowsArr.forEach(row => {
+        const checkbox = row.querySelector('.checkbox-cell input');
+        if (checkbox && checkbox.checked && row.dataset.section === 'edited') {
+          row.remove();
+        }
+      });
+      reindexRows();
+      const deletedCount = rowsArr.filter(row => {
+        const checkbox = row.querySelector('.checkbox-cell input');
+        return checkbox && checkbox.checked && row.dataset.section === 'edited';
+      }).length;
+      if (deletedCount > 0) {
+        toastText.textContent = `${deletedCount}개 삭제 완료했습니다.`;
+        toast.classList.add('show');
+        setTimeout(() => { toast.classList.remove('show'); }, 1500);
+      }
+    });
+
+    modalClose.addEventListener('click', () => {
+      modal.style.display = 'none';
+    });
+
+    // Dropdown 메뉴 생성
+    const createDropdownMenu = () => {
+      if (dropdownMenu) return dropdownMenu;
+      dropdownMenu = document.createElement('div');
+      dropdownMenu.className = 'dropdown-menu';
+      dropdownOptions.forEach(opt => {
+        const item = document.createElement('div');
+        item.className = 'dropdown-option';
+        item.textContent = opt;
+        dropdownMenu.appendChild(item);
+      });
+      document.body.appendChild(dropdownMenu);
+      return dropdownMenu;
+    };
+
+    const closeDropdown = () => {
+      if (dropdownMenu) dropdownMenu.style.display = 'none';
+    };
+
+    const openDropdown = targetCell => {
+      const menu = createDropdownMenu();
+      const rect = targetCell.getBoundingClientRect();
+      menu.style.display = 'flex';
+      menu.style.left = `${rect.left + window.scrollX}px`;
+      menu.style.top = `${rect.bottom + window.scrollY + 4}px`;
+
+      // 선택 상태 반영
+      const current = targetCell.querySelector('.dropdown-text')?.textContent.trim();
+      menu.querySelectorAll('.dropdown-option').forEach(item => {
+        item.classList.toggle('is-selected', item.textContent === current);
+        item.onclick = () => {
+          const textEl = targetCell.querySelector('.dropdown-text');
+          if (textEl) textEl.textContent = item.textContent;
+          closeDropdown();
+        };
+      });
+    };
+
+    // Dropdown 클릭 핸들러
+    document.addEventListener('click', e => {
+      const cell = e.target.closest('.dropdown-cell');
+      if (cell) {
+        e.stopPropagation();
+        openDropdown(cell);
+      } else {
+        closeDropdown();
+      }
+    });
+  </script>
+</body>
+</html>
