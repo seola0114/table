@@ -134,7 +134,7 @@
 
     th, td {
       border: 1px solid var(--border);
-      padding: 8px 10px;
+      padding: 6px 12px;
       white-space: nowrap;
       text-align: left;
     }
@@ -150,17 +150,25 @@
     }
 
     th {
-      font-weight: 400;
-      font-size: 11px;
+      font-weight: 500;
+      font-size: 13px;
       color: #444855;
+      background: #dee1e8;
+      border-right: 1px solid rgba(22, 23, 27, 0.08);
+      border-bottom: 1px solid rgba(22, 23, 27, 0.08);
     }
 
     th.top-label {
-      background: var(--header);
-      color: #000;
+      background: #dee1e8;
+      color: #444855;
       text-align: center;
-      font-weight: 400;
+      font-weight: 500;
+      font-size: 13px;
+      line-height: 20px;
       letter-spacing: 0.2px;
+      border-right: 1px solid rgba(22, 23, 27, 0.08);
+      border-bottom: 1px solid rgba(22, 23, 27, 0.08);
+      padding: 6px 12px;
     }
 
     /* 테스트 테이블 전용 폭 */
@@ -171,8 +179,15 @@
 
     .test-actions {
       display: flex;
+      justify-content: space-between;
+      align-items: center;
       gap: 8px;
       margin-bottom: 8px;
+    }
+
+    .test-actions .left-actions {
+      display: inline-flex;
+      gap: 8px;
     }
 
     .btn {
@@ -190,6 +205,76 @@
     .btn:hover {
       background: #e5eefc;
       border-color: #c3d4f5;
+    }
+
+    .btn-save {
+      padding: 4px 8px;
+      border: none;
+      border-radius: 6px;
+      background: #287eff;
+      color: #fff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-family: "SUIT Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      cursor: pointer;
+      box-shadow: none;
+    }
+
+    .btn-save:hover {
+      background: #1f6adc;
+    }
+
+    .btn-add {
+      padding: 4px 8px;
+      border: none;
+      border-radius: 6px;
+      outline: 1px solid #dee1e8;
+      outline-offset: -1px;
+      background: #fff;
+      color: #636874;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-family: "SUIT Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      cursor: pointer;
+      box-shadow: none;
+    }
+
+    .btn-add:hover {
+      background: #f5f7fc;
+    }
+
+    .btn-delete {
+      padding: 4px 8px;
+      border: none;
+      border-radius: 6px;
+      outline: 1px solid #dee1e8;
+      outline-offset: -1px;
+      background: #fff;
+      color: #6d6e70;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      font-family: "SUIT Variable", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      line-height: 20px;
+      cursor: pointer;
+      box-shadow: none;
+    }
+
+    .btn-delete:hover {
+      background: #f5f7fc;
     }
 
     /* Modal */
@@ -276,7 +361,16 @@
     }
 
     tbody tr {
-      transition: background 0.12s ease;
+      transition: background 0.25s ease;
+    }
+
+    /* hover 전환 부드럽게 */
+    td,
+    .cell,
+    .dropdown-cell,
+    .checkbox-cell,
+    .number-cell {
+      transition: background 0.25s ease, border-color 0.25s ease;
     }
 
     tbody tr:hover {
@@ -316,16 +410,16 @@
     th.sticky:not(.top-label),
     th.sticky-2 {
       z-index: 4; /* 헤더가 body 위에 오도록 */
-      background: var(--header);
+      background: #dee1e8;
     }
 
     .state-group {
-      font-weight: 400;
-      font-size: 12px;
+      font-weight: 700;
+      font-size: 13px;
+      line-height: 20px;
       background: #f0f2f5;
-      color: #000;
+      color: var(--Colors-warmgrey-40, #6d6e70);
       text-align: center;
-      letter-spacing: 0.1px;
     }
 
     .state-variant {
@@ -351,6 +445,13 @@
       width: 80px;
       background: #f8fafc;
       border-right: 1px solid rgba(22, 23, 27, 0.08);
+    }
+    th.checkbox-cell {
+      background: #dee1e8;
+      color: #444855;
+      border-right: 1px solid rgba(22, 23, 27, 0.08);
+      border-bottom: 1px solid rgba(22, 23, 27, 0.08);
+      padding: 6px 12px;
     }
 
     .checkbox-cell input {
@@ -501,11 +602,10 @@
     }
 
     /* Keep Editable Grid column static (no hover/check tint) */
-    tr.is-checked[data-section="enabled"] .state-group,
-    tr.is-checked[data-section="focus"] .state-group,
+    tr.is-checked .state-group,
     tr.is-hover .state-group {
       background: #f0f2f5;
-      color: #000;
+      color: var(--Colors-warmgrey-40, #6d6e70);
       border-right: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
     }
@@ -570,6 +670,13 @@
       font-weight: 500;
       background: #f8fafc;
       border-right: 1px solid rgba(22, 23, 27, 0.08);
+    }
+    th.number-cell {
+      background: #dee1e8;
+      color: #444855;
+      border-right: 1px solid rgba(22, 23, 27, 0.08);
+      border-bottom: 1px solid rgba(22, 23, 27, 0.08);
+      padding: 6px 12px;
     }
 
     .badge {
@@ -756,282 +863,572 @@
         </div>
       </div>
       <div class="test-actions">
-        <button class="btn" id="add-row">행 추가 (Edited)</button>
-        <button class="btn" id="delete-rows">행 삭제</button>
-        <button class="btn" id="save-rows">저장</button>
+        <div class="left-actions">
+          <button class="btn-add" id="add-row">
+            <span aria-hidden="true" style="display:inline-flex;">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13.333 2C13.6997 2 14 2.30033 14 2.66699V13.333C14 13.6997 13.6997 14 13.333 14H2.66699C2.30033 14 2 13.6997 2 13.333V2.66699C2 2.30033 2.30033 2 2.66699 2H13.333ZM3.06641 3.06641V12.9336H12.9336V3.06641H3.06641ZM8.36621 4.66699C8.45944 4.66699 8.53303 4.73983 8.5332 4.83301V7.4668H11.167C11.2602 7.46697 11.333 7.54056 11.333 7.63379V8.36621C11.333 8.45944 11.2602 8.53303 11.167 8.5332H8.5332V11.167C8.53303 11.2602 8.45944 11.333 8.36621 11.333H7.63379C7.54056 11.333 7.46697 11.2602 7.4668 11.167V8.5332H4.83301C4.73983 8.53303 4.66699 8.45815 4.66699 8.36621V7.63379C4.66699 7.54185 4.73983 7.46697 4.83301 7.4668H7.4668V4.83301C7.46697 4.73983 7.54056 4.66699 7.63379 4.66699H8.36621Z" fill="#4353C1"/>
+              </svg>
+            </span>
+            <span>행 추가</span>
+          </button>
+          <button class="btn-delete" id="delete-rows">
+            <span aria-hidden="true" style="display:inline-flex;">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13.333 2C13.6997 2 14 2.30033 14 2.66699V13.333C14 13.6997 13.6997 14 13.333 14H2.66699C2.30033 14 2 13.6997 2 13.333V2.66699C2 2.30033 2.30033 2 2.66699 2H13.333ZM3.06641 3.06641V12.9336H12.9336V3.06641H3.06641ZM11.167 7.4668C11.2589 7.46697 11.333 7.54185 11.333 7.63379V8.36621C11.333 8.45815 11.2589 8.53303 11.167 8.5332H4.83301C4.74111 8.53303 4.66699 8.45815 4.66699 8.36621V7.63379C4.66699 7.54185 4.74111 7.46697 4.83301 7.4668H11.167Z" fill="#DC2F0C"/>
+              </svg>
+            </span>
+            <span>행 삭제</span>
+          </button>
+        </div>
+        <div>
+          <button class="btn-save" id="save-rows">
+            <span aria-hidden="true" style="display:inline-flex;">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6.55032 11.9502L2.71699 8.12731C2.65033 8.06083 2.65033 7.9611 2.71699 7.89461L3.23699 7.37603C3.30366 7.30954 3.40366 7.30954 3.47033 7.37603L6.71033 10.6072L12.5303 4.71661C12.597 4.65013 12.697 4.65013 12.7637 4.71661L13.2837 5.2352C13.3503 5.30168 13.3503 5.40141 13.2837 5.4679L6.78366 11.9502C6.71699 12.0167 6.61699 12.0167 6.55032 11.9502Z" fill="white"/>
+              </svg>
+            </span>
+            <span>등록</span>
+          </button>
+        </div>
       </div>
-      <div class="table-container">
-        <table class="test-table" aria-label="테스트용 미니 테이블">
+<div class="table-container">
+        <table class="test-table" id="playground-table" aria-label="테스트용 미니 테이블">
           <thead>
           <tr>
             <th class="sticky" style="min-width:120px;">상태 그룹</th>
             <th class="sticky-2" style="min-width:140px;">상태</th>
-            <th class="checkbox-cell">선택</th>
+            <th class="checkbox-cell"><input type="checkbox" id="playground-select-all" aria-label="테스트 테이블 전체 선택" /></th>
             <th class="number-cell">No.</th>
             <th>비용항목</th>
+            <th>품목</th>
             <th>상차지</th>
             <th>하차지</th>
-          </tr>
-          </thead>
-          <tbody>
-          <tr data-section="enabled" data-filled="true">
-            <td class="sticky state-group">Enabled</td>
-            <td class="sticky-2 state-variant">Enabled</td>
-            <td class="checkbox-cell"><input type="checkbox" /></td>
-            <td class="number-cell">1</td>
-            <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
-            <td><div class="cell"><div class="cell-text" contenteditable="true">입력</div></div></td>
-            <td><div class="cell"><div class="cell-text" contenteditable="true">입력</div></div></td>
-          </tr>
-          <tr data-section="enabled" data-filled="true">
-            <td class="sticky state-group">Enabled</td>
-            <td class="sticky-2 state-variant">Enabled</td>
-            <td class="checkbox-cell"><input type="checkbox" /></td>
-            <td class="number-cell">2</td>
-            <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
-            <td><div class="cell"><div class="cell-text" contenteditable="true">입력</div></div></td>
-            <td><div class="cell"><div class="cell-text" contenteditable="true">입력</div></div></td>
-          </tr>
-          <tr data-section="enabled" data-filled="true">
-            <td class="sticky state-group">Enabled</td>
-            <td class="sticky-2 state-variant">Enabled</td>
-            <td class="checkbox-cell"><input type="checkbox" /></td>
-            <td class="number-cell">3</td>
-            <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
-            <td><div class="cell"><div class="cell-text" contenteditable="true">입력</div></div></td>
-            <td><div class="cell"><div class="cell-text" contenteditable="true">입력</div></div></td>
-          </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-      <div class="table-container">
-        <table aria-label="Editable Grid 상태 정의">
-          <thead>
-          <tr>
-            <th class="sticky top-label" style="min-width:120px;">Editable Grid</th>
-            <th class="sticky-2" style="min-width:100px;">상태</th>
-            <th class="checkbox-cell"></th>
-            <th class="number-cell">No.</th>
-            <th>비용항목</th>
-            <th>상차지</th>
-            <th>하차지</th>
-            <th>모달 구분</th>
-            <th>자동</th>
-            <th>1.5ton</th>
-            <th>2.5ton</th>
-            <th>5ton</th>
-            <th>8ton</th>
-            <th>기타 옵션</th>
+            <th>요율구분-매출</th>
+            <th>요율구분-매입</th>
+            <th>차종</th>
+            <th>요율단가-매출</th>
+            <th>요율단가-매입</th>
+            <th>요율단가(위수탁)-자점</th>
+            <th>요율단가(위수탁)-타점</th>
+            <th>1Ton-매출</th>
+            <th>1Ton-매입</th>
+            <th>2.5Ton</th>
+            <th>6Ton</th>
+            <th>8Ton</th>
+            <th>18Ton</th>
+            <th>25Ton(위수탁)</th>
+            <th>운송가맹점 계약할당</th>
+            <th>변경횟수-매출</th>
+            <th>변경횟수-매입</th>
+            <th>노드ID-상차노드</th>
+            <th>노드ID-하차노드</th>
           </tr>
           </thead>
           <tbody>
 
-          <!-- Enabled -->
-          <tr data-section="enabled" class="is-default">
-            <td rowspan="4" class="sticky state-group">Enabled</td>
+          <tr data-section="enabled">
+            <td class="sticky state-group">Enabled</td>
             <td class="sticky-2 state-variant">Enabled</td>
             <td class="checkbox-cell"><input type="checkbox" /></td>
             <td class="number-cell">1</td>
             <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
             <td><div class="cell"><div class="cell-text">입력</div></div></td>
             <td><div class="cell"><div class="cell-text">입력</div></div></td>
-            <td><div class="cell"><div class="cell-text">대장</div></div></td>
-            <td><div class="cell"><div class="cell-text">자동</div></div></td>
             <td><div class="cell"><div class="cell-text">입력</div></div></td>
             <td><div class="cell"><div class="cell-text">입력</div></div></td>
             <td><div class="cell"><div class="cell-text">입력</div></div></td>
             <td><div class="cell"><div class="cell-text">입력</div></div></td>
-            <td class="mono">…</td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
           </tr>
           <tr data-section="enabled" class="is-hover">
+            <td class="sticky state-group">Enabled</td>
             <td class="sticky-2 state-variant">Enabled + Hover</td>
             <td class="checkbox-cell"><input type="checkbox" /></td>
             <td class="number-cell">2</td>
             <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>대장</td>
-            <td>자동</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td class="mono">…</td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
           </tr>
           <tr data-section="enabled" class="is-checked">
+            <td class="sticky state-group">Enabled</td>
             <td class="sticky-2 state-variant">Enabled + Checked</td>
             <td class="checkbox-cell"><input type="checkbox" checked /></td>
             <td class="number-cell">3</td>
             <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>대장</td>
-            <td>자동</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td class="mono">…</td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+          </tr>
+
+          </tbody></table>
+      </div>
+    </div>
+      <div class="table-container">
+        <table id="guide-table" aria-label="Editable Grid 상태 정의">
+          <thead>
+          <tr>
+            <th class="sticky top-label" style="min-width:120px;">Editable Grid</th>
+            <th class="sticky-2" style="min-width:100px;">상태</th>
+            <th class="checkbox-cell"><input type="checkbox" id="guide-select-all" aria-label="전체 선택" /></th>
+            <th class="number-cell">No.</th>
+            <th>비용항목</th>
+            <th>품목</th>
+            <th>상차지</th>
+            <th>하차지</th>
+            <th>요율구분-매출</th>
+            <th>요율구분-매입</th>
+            <th>차종</th>
+            <th>요율단가-매출</th>
+            <th>요율단가-매입</th>
+            <th>요율단가(위수탁)-자점</th>
+            <th>요율단가(위수탁)-타점</th>
+            <th>1Ton-매출</th>
+            <th>1Ton-매입</th>
+            <th>2.5Ton</th>
+            <th>6Ton</th>
+            <th>8Ton</th>
+            <th>18Ton</th>
+            <th>25Ton(위수탁)</th>
+            <th>운송가맹점 계약할당</th>
+            <th>변경횟수-매출</th>
+            <th>변경횟수-매입</th>
+            <th>노드ID-상차노드</th>
+            <th>노드ID-하차노드</th>
+          </tr>
+          </thead>
+          <tbody>
+
+          <tr data-section="enabled">
+            <td class="sticky state-group">Enabled</td>
+            <td class="sticky-2 state-variant">Enabled</td>
+            <td class="checkbox-cell"><input type="checkbox" /></td>
+            <td class="number-cell">1</td>
+            <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+          </tr>
+          <tr data-section="enabled" class="is-hover">
+            <td class="sticky state-group">Enabled</td>
+            <td class="sticky-2 state-variant">Enabled + Hover</td>
+            <td class="checkbox-cell"><input type="checkbox" /></td>
+            <td class="number-cell">2</td>
+            <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+          </tr>
+          <tr data-section="enabled" class="is-checked">
+            <td class="sticky state-group">Enabled</td>
+            <td class="sticky-2 state-variant">Enabled + Checked</td>
+            <td class="checkbox-cell"><input type="checkbox" checked /></td>
+            <td class="number-cell">3</td>
+            <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
           </tr>
           <tr data-section="enabled" class="is-checked is-hover">
+            <td class="sticky state-group">Enabled</td>
             <td class="sticky-2 state-variant">Enabled + Checked + Hover</td>
             <td class="checkbox-cell"><input type="checkbox" checked /></td>
             <td class="number-cell">4</td>
             <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>대장</td>
-            <td>자동</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td class="mono">…</td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
           </tr>
-
-          <!-- Focus -->
           <tr data-section="focus">
-            <td rowspan="3" class="sticky state-group">Focus</td>
+            <td class="sticky state-group">Focus</td>
             <td class="sticky-2 state-variant">Default</td>
             <td class="checkbox-cell"><input type="checkbox" /></td>
             <td class="number-cell">5</td>
             <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>대장</td>
-            <td>자동</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td class="mono">…</td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
           </tr>
           <tr data-section="focus" class="is-checked">
+            <td class="sticky state-group">Focus</td>
             <td class="sticky-2 state-variant">Checked</td>
             <td class="checkbox-cell"><input type="checkbox" checked /></td>
             <td class="number-cell">6</td>
             <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>대장</td>
-            <td>자동</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td class="mono">…</td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
           </tr>
           <tr data-section="focus" class="is-hover">
+            <td class="sticky state-group">Focus</td>
             <td class="sticky-2 state-variant">Hover</td>
             <td class="checkbox-cell"><input type="checkbox" /></td>
             <td class="number-cell">7</td>
             <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>대장</td>
-            <td>자동</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td class="mono">…</td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
           </tr>
-
-          <!-- Edited -->
           <tr data-section="edited">
-            <td rowspan="3" class="sticky state-group">Edited</td>
+            <td class="sticky state-group">Edited</td>
             <td class="sticky-2 state-variant">Default</td>
             <td class="checkbox-cell"><input type="checkbox" /></td>
             <td class="number-cell">8</td>
             <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>대장</td>
-            <td>자동</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td class="mono">…</td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
           </tr>
           <tr data-section="edited" class="is-checked">
+            <td class="sticky state-group">Edited</td>
             <td class="sticky-2 state-variant">Checked</td>
             <td class="checkbox-cell"><input type="checkbox" checked /></td>
             <td class="number-cell">9</td>
             <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>대장</td>
-            <td>자동</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td class="mono">…</td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
           </tr>
           <tr data-section="edited" class="is-hover">
+            <td class="sticky state-group">Edited</td>
             <td class="sticky-2 state-variant">Hover</td>
             <td class="checkbox-cell"><input type="checkbox" /></td>
             <td class="number-cell">10</td>
             <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>대장</td>
-            <td>자동</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td class="mono">…</td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
           </tr>
-
-          <!-- Error -->
           <tr data-section="error">
-            <td rowspan="3" class="sticky state-group">Error</td>
+            <td class="sticky state-group">Error</td>
             <td class="sticky-2 state-variant">Default</td>
             <td class="checkbox-cell"><input type="checkbox" /></td>
             <td class="number-cell">11</td>
             <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>대장</td>
-            <td>자동</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td class="mono">…</td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
           </tr>
           <tr data-section="error" class="is-checked">
+            <td class="sticky state-group">Error</td>
             <td class="sticky-2 state-variant">Checked</td>
             <td class="checkbox-cell"><input type="checkbox" checked /></td>
             <td class="number-cell">12</td>
             <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>대장</td>
-            <td>자동</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td class="mono">…</td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
           </tr>
           <tr data-section="error" class="is-hover">
+            <td class="sticky state-group">Error</td>
             <td class="sticky-2 state-variant">Hover</td>
             <td class="checkbox-cell"><input type="checkbox" /></td>
             <td class="number-cell">13</td>
             <td><div class="dropdown-cell"><div class="dropdown-text">운송료</div><div class="dropdown-arrow"></div></div></td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>대장</td>
-            <td>자동</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td>입력</td>
-            <td class="mono">…</td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
+            <td><div class="cell"><div class="cell-text">입력</div></div></td>
           </tr>
 
           </tbody>
@@ -1086,7 +1483,10 @@
     });
 
     // 테스트 테이블 동작
+    const guideTable = document.getElementById('guide-table');
+    const guideSelectAll = document.getElementById('guide-select-all');
     const testTable = document.querySelector('.test-table tbody');
+    const playgroundSelectAll = document.getElementById('playground-select-all');
     const addRowBtn = document.getElementById('add-row');
     const deleteBtn = document.getElementById('delete-rows');
     const saveBtn = document.getElementById('save-rows');
@@ -1112,6 +1512,37 @@
       });
     };
 
+    const syncPlaygroundHeader = () => {
+      if (!playgroundSelectAll) return;
+      const rows = testRows();
+      if (!rows.length) {
+        playgroundSelectAll.checked = false;
+        return;
+      }
+      playgroundSelectAll.checked = rows.every(row => {
+        const cb = row.querySelector('.checkbox-cell input');
+        return cb && cb.checked;
+      });
+    };
+
+    const syncGuideHeader = () => {
+      if (!guideSelectAll || !guideTable) return;
+      const inputs = guideTable.querySelectorAll('tbody .checkbox-cell input');
+      if (!inputs.length) {
+        guideSelectAll.checked = false;
+        return;
+      }
+      guideSelectAll.checked = Array.from(inputs).every(cb => cb.checked);
+    };
+
+    if (guideSelectAll && guideTable) {
+      guideSelectAll.addEventListener('change', () => {
+        guideTable.querySelectorAll('tbody .checkbox-cell input').forEach(cb => {
+          cb.checked = guideSelectAll.checked;
+        });
+      });
+    }
+
     // 클릭 시 체크 토글 (Enabled -> Checked)
     testTable.addEventListener('click', e => {
       const row = e.target.closest('tr');
@@ -1122,13 +1553,17 @@
       const clickedCheckbox = e.target.closest('input[type="checkbox"]');
       if (clickedCheckbox) {
         // 기본 체크 동작 후 상태 반영만
-        setTimeout(() => updateRowClasses(row), 0);
+        setTimeout(() => {
+          updateRowClasses(row);
+          syncPlaygroundHeader();
+        }, 0);
       } else {
         // 행 클릭으로 토글
         checkbox.checked = !checkbox.checked;
         updateRowClasses(row);
       }
       reindexRows();
+      syncPlaygroundHeader();
     });
 
     // 행 추가 (Edited, 비워둔 셀)
@@ -1149,6 +1584,7 @@
       testTable.prepend(row);
       updateRowClasses(row);
       reindexRows();
+      syncPlaygroundHeader();
     });
 
     // 저장 시 비어있는 행은 Error로 전환
@@ -1167,6 +1603,7 @@
         updateRowClasses(row);
       });
       reindexRows();
+      syncPlaygroundHeader();
     });
 
     // 선택 삭제
@@ -1189,6 +1626,7 @@
         }
       });
       reindexRows();
+      syncPlaygroundHeader();
       const deletedCount = rowsArr.filter(row => {
         const checkbox = row.querySelector('.checkbox-cell input');
         return checkbox && checkbox.checked && row.dataset.section === 'edited';
@@ -1203,6 +1641,20 @@
     modalClose.addEventListener('click', () => {
       modal.style.display = 'none';
     });
+
+    if (playgroundSelectAll) {
+      playgroundSelectAll.addEventListener('change', () => {
+        testRows().forEach(row => {
+          const cb = row.querySelector('.checkbox-cell input');
+          if (cb) {
+            cb.checked = playgroundSelectAll.checked;
+            updateRowClasses(row);
+          }
+        });
+        reindexRows();
+        syncPlaygroundHeader();
+      });
+    }
 
     // Dropdown 메뉴 생성
     const createDropdownMenu = () => {
@@ -1252,6 +1704,10 @@
         closeDropdown();
       }
     });
+
+    // 초기 헤더 체크박스 동기화
+    syncPlaygroundHeader();
+    syncGuideHeader();
   </script>
 </body>
 </html>
