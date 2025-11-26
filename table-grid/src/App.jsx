@@ -173,6 +173,7 @@ export default function App() {
           disableRowSelectionOnClick
           getRowClassName={mainRowClass}
           onCellClick={(params) => setFocusedMain(params.id)}
+          autoHeight
           sx={{
             fontFamily: "SUIT Variable",
             "& .row-Enabled": { bgcolor: sectionColors.Enabled },
@@ -246,7 +247,6 @@ export default function App() {
               backgroundImage:
                 "linear-gradient(0deg, hsla(228, 10%, 10%, 0.06) 0%, hsla(228, 10%, 10%, 0.06) 100%)",
             },
-            height: 640,
           }}
         />
       </Box>
