@@ -49,16 +49,49 @@ button {
   white-space: nowrap;
 }
 
+/* 정렬 아이콘 색상 */
+.MuiDataGrid-sortIcon {
+  color: #287EFF !important;
+}
+
 /* 체크박스 기본(Enabled) 스타일 */
 .MuiDataGrid-root input[type="checkbox"] {
   appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
   width: 16px;
   height: 16px;
   border-radius: 4px;
-  border: 1px solid var(--Colors-grey-80, #C9CDD7);
+  border: 1px solid #6D6E70;
   background: var(--Semantic-Static-white, #fff);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none'><path d='M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z' fill='%236D6E70'/></svg>") !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: 16px 16px !important;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+  position: relative;
 }
+
+/* 셀 텍스트 왼쪽 정렬 및 말줄임 */
+.MuiDataGrid-cell {
+  justify-content: flex-start !important;
+  text-align: left !important;
+}
+
+.MuiDataGrid-cellContent {
+  display: block;
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: left;
+}
+
+
 
 .MuiDataGrid-root input[type="checkbox"]:hover {
   border: 1px solid var(--Colors-blue-30, #184C99);
@@ -66,10 +99,64 @@ button {
 }
 
 .MuiDataGrid-root input[type="checkbox"]:checked {
-  border: 1px solid var(--Semantic-Accent-primary, #122699);
+  border: 1px solid var(--Colors-blue-40, #2065CC);
   background: var(--Colors-blue-50, #287EFF);
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='6' viewBox='0 0 8 6' fill='none'><path d='M2.55 5.95017L0.05 3.45847C-0.0166667 3.39203 -0.0166667 3.29236 0.05 3.22591L0.57 2.70764C0.636666 2.6412 0.736667 2.6412 0.803333 2.70764L2.71 4.60797L7.19667 0.0498339C7.26333 -0.0166113 7.36333 -0.0166113 7.43 0.0498339L7.95 0.568106C8.01667 0.634551 8.01667 0.734219 7.95 0.800665L2.78333 5.95017C2.71667 6.01661 2.61667 6.01661 2.55 5.95017Z' fill='white'/></svg>");
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'><path d='M6.55 11.2835L4.05 8.79182C3.98333 8.72537 3.98333 8.6257 4.05 8.55926L4.57 8.04098C4.63667 7.97454 4.73667 7.97454 4.80333 8.04098L6.71 9.94132L11.1967 5.38318C11.2633 5.31673 11.3633 5.31673 11.43 5.38318L11.95 5.90145C12.0167 5.96789 12.0167 6.06756 11.95 6.13401L6.78333 11.2835C6.71667 11.35 6.61667 11.35 6.55 11.2835Z' fill='white'/></svg>");
   background-position: center;
   background-repeat: no-repeat;
-  background-size: 8px 6px;
+  background-size: 16px 16px;
+}
+
+/* 체크박스 칸은 패딩 없이 중앙 정렬 */
+.MuiDataGrid-cellCheckbox {
+  width: 76px !important;
+  padding: 4px 12px 4px 40px !important;
+  border-right: 1px solid var(--Colors-black_opacity-black_opacity8, rgba(22, 23, 27, 0.08));
+  border-bottom: 1px solid var(--Colors-black_opacity-black_opacity8, rgba(22, 23, 27, 0.08));
+  background: var(--Semantic-Static-white, #FFF);
+}
+
+.MuiDataGrid-columnHeaderCheckbox {
+  display: flex !important;
+  align-items: center;
+  justify-content: center;
+  width: 76px !important;
+  padding: 0 !important;
+  overflow: visible !important;
+  border-right: 1px solid var(--Colors-black_opacity-black_opacity8, rgba(22, 23, 27, 0.08));
+  border-bottom: 1px solid var(--Colors-black_opacity-black_opacity8, rgba(22, 23, 27, 0.08));
+  background: var(--Colors-grey-90, #DEE1E8);
+}
+
+/* 헤더/셀 체크박스가 가운데 보이도록 강제 */
+.MuiDataGrid-columnHeaderCheckbox .MuiDataGrid-checkboxInput,
+.MuiDataGrid-cellCheckbox .MuiDataGrid-checkboxInput {
+  display: block;
+  margin: 0 auto;
+}
+
+.MuiDataGrid-columnHeaderCheckbox svg {
+  margin: 0 auto;
+}
+
+/* 헤더 체크박스도 행과 동일한 기본/체크 스타일 사용 */
+.MuiDataGrid-columnHeaderCheckbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  border: 1px solid #6D6E70;
+  background: #fff;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none'><path d='M19 5v14H5V5h14m0-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z' fill='%236D6E70'/></svg>") !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: 16px 16px !important;
+}
+
+.MuiDataGrid-columnHeaderCheckbox input[type="checkbox"]:checked {
+  border: 1px solid var(--Colors-blue-40, #2065CC);
+  background: var(--Colors-blue-50, #287EFF);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16' fill='none'><path d='M6.55 11.2835L4.05 8.79182C3.98333 8.72537 3.98333 8.6257 4.05 8.55926L4.57 8.04098C4.63667 7.97454 4.73667 7.97454 4.80333 8.04098L6.71 9.94132L11.1967 5.38318C11.2633 5.31673 11.3633 5.31673 11.43 5.38318L11.95 5.90145C12.0167 5.96789 12.0167 6.06756 11.95 6.13401L6.78333 11.2835C6.71667 11.35 6.61667 11.35 6.55 11.2835Z' fill='white'/></svg>") !important;
+  background-repeat: no-repeat !important;
+  background-position: center !important;
+  background-size: 16px 16px !important;
 }
