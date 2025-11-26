@@ -69,7 +69,7 @@ const rows = [
 
 const sectionColors = {
   Enabled: "#fff",
-  Focus: "#e8f2ff",
+  Focus: "hsla(216, 100%, 58%, 0.06)",
   Edited: "#fff7e7",
   Error: "#fff0f0",
 };
@@ -83,7 +83,7 @@ function DropdownCell({ value }) {
         onClick={() => setOpen(!open)}
         sx={{
           px: 1.5, py: 0.75, border: "1px solid rgba(22,23,27,0.08)",
-          borderRadius: "6px", bgcolor: "#fff", minWidth: 100,
+          borderRadius: "6px", bgcolor: "transparent", minWidth: 100,
           display: "inline-flex", alignItems: "center", justifyContent: "space-between", gap: 1, cursor: "pointer",
           fontFamily: "SUIT Variable", fontSize: 13, fontWeight: 500, color: "#16171b",
         }}
@@ -119,12 +119,14 @@ export default function App() {
   const [data, setData] = React.useState(rows);
   const [playgroundRows, setPlaygroundRows] = React.useState(rows.slice(0, 3));
   const [selection, setSelection] = React.useState([]);
+  const [focusedMain, setFocusedMain] = React.useState(null);
+  const [focusedPlayground, setFocusedPlayground] = React.useState(null);
 
   const addRow = () => {
-    const nextId = (playgroundRows[playgroundRows.length - 1]?.id ?? 0) + 1;
+    const nextId = playgroundRows.reduce((max, r) => Math.max(max, r.id), 0) + 1;
     setPlaygroundRows((prev) => [
-      ...prev,
       { id: nextId, section: "Edited", variant: "New", no: nextId, ...baseRow },
+      ...prev,
     ]);
   };
 
@@ -138,6 +140,26 @@ export default function App() {
     alert("등록 완료 (콘솔 확인)");
   };
 
+  const mainRowClass = React.useCallback(
+    (params) => {
+      let cls = `row-${params.row.section}`;
+      if (params.row.checked) cls += " row-checked";
+      if (params.id === focusedMain) cls += " row-focused";
+      return cls;
+    },
+    [focusedMain]
+  );
+
+  const playgroundRowClass = React.useCallback(
+    (params) => {
+      let cls = `row-${params.row.section}`;
+      if (params.row.checked) cls += " row-checked";
+      if (params.id === focusedPlayground) cls += " row-focused";
+      return cls;
+    },
+    [focusedPlayground]
+  );
+
   return (
     <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 3 }}>
       <Box>
@@ -149,15 +171,80 @@ export default function App() {
           columns={columns}
           checkboxSelection
           disableRowSelectionOnClick
-          getRowClassName={({ row }) => `row-${row.section}`}
+          getRowClassName={mainRowClass}
+          onCellClick={(params) => setFocusedMain(params.id)}
           sx={{
             fontFamily: "SUIT Variable",
             "& .row-Enabled": { bgcolor: sectionColors.Enabled },
             "& .row-Focus": { bgcolor: sectionColors.Focus },
             "& .row-Edited": { bgcolor: sectionColors.Edited },
             "& .row-Error": { bgcolor: sectionColors.Error },
+            "& .row-focused .MuiDataGrid-cell": {
+              backgroundColor: sectionColors.Focus,
+              backgroundImage:
+                "linear-gradient(0deg, hsla(228, 10%, 10%, 0.06) 0%, hsla(228, 10%, 10%, 0.06) 100%)",
+            },
             "& .MuiDataGrid-columnHeaders": {
-              bgcolor: "#dee1e8", color: "#444855", fontWeight: 500, fontSize: 13
+              bgcolor: "#DEE1E8",
+              color: "var(--Colors-grey-30, #444855)",
+              fontWeight: 500,
+              fontSize: 13,
+              fontFamily: "SUIT Variable",
+              lineHeight: "20px",
+            },
+            "& .MuiDataGrid-columnHeadersInner": {
+              bgcolor: "#DEE1E8",
+            },
+            "& .MuiDataGrid-columnHeader": {
+              borderRight:
+                "1px solid var(--Colors-black_opacity-black_opacity8, rgba(22, 23, 27, 0.08))",
+              borderBottom:
+                "1px solid var(--Colors-black_opacity-black_opacity8, rgba(22, 23, 27, 0.08))",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            },
+            "& .MuiDataGrid-columnHeaderTitle": {
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              color: "var(--Colors-grey-30, #444855)",
+              fontFamily: "SUIT Variable",
+              fontSize: 13,
+              fontStyle: "normal",
+              fontWeight: 500,
+              lineHeight: "20px",
+            },
+            "& .MuiDataGrid-columnHeader, & .MuiDataGrid-cell": {
+              transition: "background-color 0.25s ease, background-image 0.25s ease",
+            },
+            "& .MuiDataGrid-row": {
+              transition: "background-color 0.25s ease, background-image 0.25s ease",
+            },
+            // 기본 hover 오버레이
+            "& .MuiDataGrid-row:hover .MuiDataGrid-cell": {
+              backgroundColor: "inherit",
+              backgroundImage:
+                "linear-gradient(0deg, hsla(228, 10%, 10%, 0.06) 0%, hsla(228, 10%, 10%, 0.06) 100%)",
+            },
+            // Focus 기본일 때는 hover 오버레이 제거
+            "& .row-Focus:not(.row-checked):hover .MuiDataGrid-cell": {
+              backgroundImage: "none",
+            },
+            // Focus에서 체크된 경우에만 오버레이 유지
+            "& .row-Focus.row-checked:hover .MuiDataGrid-cell": {
+              backgroundColor: sectionColors.Focus,
+              backgroundImage:
+                "linear-gradient(0deg, hsla(228, 10%, 10%, 0.06) 0%, hsla(228, 10%, 10%, 0.06) 100%)",
+            },
+            "& .row-Edited:hover .MuiDataGrid-cell": {
+              backgroundColor: sectionColors.Edited,
+              backgroundImage:
+                "linear-gradient(0deg, hsla(228, 10%, 10%, 0.06) 0%, hsla(228, 10%, 10%, 0.06) 100%)",
+            },
+            "& .row-Error:hover .MuiDataGrid-cell": {
+              backgroundColor: sectionColors.Error,
+              backgroundImage:
+                "linear-gradient(0deg, hsla(228, 10%, 10%, 0.06) 0%, hsla(228, 10%, 10%, 0.06) 100%)",
             },
             height: 640,
           }}
@@ -186,15 +273,80 @@ export default function App() {
           disableRowSelectionOnClick
           onRowSelectionModelChange={(ids) => setSelection(ids)}
           rowSelectionModel={selection}
-          getRowClassName={({ row }) => `row-${row.section}`}
+          onCellClick={(params) => setFocusedPlayground(params.id)}
+          getRowClassName={playgroundRowClass}
           sx={{
             fontFamily: "SUIT Variable",
             "& .row-Enabled": { bgcolor: sectionColors.Enabled },
             "& .row-Focus": { bgcolor: sectionColors.Focus },
             "& .row-Edited": { bgcolor: sectionColors.Edited },
             "& .row-Error": { bgcolor: sectionColors.Error },
+            "& .row-focused .MuiDataGrid-cell": {
+              backgroundColor: sectionColors.Focus,
+              backgroundImage:
+                "linear-gradient(0deg, hsla(228, 10%, 10%, 0.06) 0%, hsla(228, 10%, 10%, 0.06) 100%)",
+            },
             "& .MuiDataGrid-columnHeaders": {
-              bgcolor: "#dee1e8", color: "#444855", fontWeight: 500, fontSize: 13
+              bgcolor: "#DEE1E8",
+              color: "var(--Colors-grey-30, #444855)",
+              fontWeight: 500,
+              fontSize: 13,
+              fontFamily: "SUIT Variable",
+              lineHeight: "20px",
+            },
+            "& .MuiDataGrid-columnHeadersInner": {
+              bgcolor: "#DEE1E8",
+            },
+            "& .MuiDataGrid-columnHeader": {
+              borderRight:
+                "1px solid var(--Colors-black_opacity-black_opacity8, rgba(22, 23, 27, 0.08))",
+              borderBottom:
+                "1px solid var(--Colors-black_opacity-black_opacity8, rgba(22, 23, 27, 0.08))",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            },
+            "& .MuiDataGrid-columnHeaderTitle": {
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              color: "var(--Colors-grey-30, #444855)",
+              fontFamily: "SUIT Variable",
+              fontSize: 13,
+              fontStyle: "normal",
+              fontWeight: 500,
+              lineHeight: "20px",
+            },
+            "& .MuiDataGrid-columnHeader, & .MuiDataGrid-cell": {
+              transition: "background-color 0.25s ease, background-image 0.25s ease",
+            },
+            "& .MuiDataGrid-row": {
+              transition: "background-color 0.25s ease, background-image 0.25s ease",
+            },
+            // 기본 hover 오버레이
+            "& .MuiDataGrid-row:hover .MuiDataGrid-cell": {
+              backgroundColor: "inherit",
+              backgroundImage:
+                "linear-gradient(0deg, hsla(228, 10%, 10%, 0.06) 0%, hsla(228, 10%, 10%, 0.06) 100%)",
+            },
+            // Focus 기본일 때는 hover 오버레이 제거
+            "& .row-Focus:not(.row-checked):hover .MuiDataGrid-cell": {
+              backgroundImage: "none",
+            },
+            // Focus에서 체크된 경우에만 오버레이 유지
+            "& .row-Focus.row-checked:hover .MuiDataGrid-cell": {
+              backgroundColor: sectionColors.Focus,
+              backgroundImage:
+                "linear-gradient(0deg, hsla(228, 10%, 10%, 0.06) 0%, hsla(228, 10%, 10%, 0.06) 100%)",
+            },
+            "& .row-Edited:hover .MuiDataGrid-cell": {
+              backgroundColor: sectionColors.Edited,
+              backgroundImage:
+                "linear-gradient(0deg, hsla(228, 10%, 10%, 0.06) 0%, hsla(228, 10%, 10%, 0.06) 100%)",
+            },
+            "& .row-Error:hover .MuiDataGrid-cell": {
+              backgroundColor: sectionColors.Error,
+              backgroundImage:
+                "linear-gradient(0deg, hsla(228, 10%, 10%, 0.06) 0%, hsla(228, 10%, 10%, 0.06) 100%)",
             },
             height: 500,
           }}
