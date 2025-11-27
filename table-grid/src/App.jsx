@@ -1,8 +1,6 @@
 import * as React from "react";
 import { DataGridPro } from "@mui/x-data-grid-pro";
-import { Box, Button, Stack } from "@mui/material";
-import DeleteIcon from "@mui/icons-material/Delete";
-import SaveIcon from "@mui/icons-material/Save";
+import { Box, Button, Stack, Typography } from "@mui/material";
 
 const columns = [
   { field: "section", headerName: "상태 그룹", width: 100 },
@@ -193,7 +191,16 @@ const sectionColors = {
   Error: "#FFF0F0",
 };
 const overlayColor = "hsla(216, 100%, 58%, 0.06)";
+const overlayGray = "rgba(17, 24, 39, 0.08)";
 const checkedBg = "hsla(216, 100%, 58%, 0.12)";
+const pinnedColumns = { left: ["section", "variant", "__check__", "no"] };
+const filterChips = [
+  { value: "all", label: "전체", dot: "#9ca3af" },
+  { value: "Enabled", label: "Enabled", dot: "#1d4ed8" },
+  { value: "Focus", label: "Focus", dot: "#0ea5e9" },
+  { value: "Edited", label: "Edited", dot: "#d97706" },
+  { value: "Error", label: "Error", dot: "#dc2626" },
+];
 
 function DropdownCell({ value }) {
   const [open, setOpen] = React.useState(false);
@@ -258,6 +265,11 @@ export default function App() {
   const [focusedPlayground, setFocusedPlayground] = React.useState(null);
   const [toastOpen, setToastOpen] = React.useState(false);
   const [toastMessage, setToastMessage] = React.useState("");
+  const [filter, setFilter] = React.useState("all");
+  const filteredMainRows = React.useMemo(
+    () => (filter === "all" ? data : data.filter((row) => row.section === filter)),
+    [data, filter]
+  );
 
   const addRow = () => {
     const nextId = playgroundRows.reduce((max, r) => Math.max(max, r.id), 0) + 1;
@@ -291,6 +303,7 @@ export default function App() {
       if (params.row.checked) cls += " row-checked";
       if (params.id === focusedMain) cls += " row-focused";
       if (params.row.simulatedHover) cls += " row-sim-hover";
+      if (params.row.section === "Edited" && params.row.variant === "New") cls += " row-edited-new";
       return cls;
     },
     [focusedMain]
@@ -302,6 +315,7 @@ export default function App() {
       if (params.row.checked) cls += " row-checked";
       if (params.id === focusedPlayground) cls += " row-focused";
       if (params.row.simulatedHover) cls += " row-sim-hover";
+      if (params.row.section === "Edited" && params.row.variant === "New") cls += " row-edited-new";
       return cls;
     },
     [focusedPlayground]
@@ -322,9 +336,12 @@ export default function App() {
   };
 
   const toggleMainCheckbox = (id) => {
+    const visibleIds = filter === "all" ? data.map((r) => r.id) : filteredMainRows.map((r) => r.id);
     if (id === "__all__") {
-      const allIds = data.map((r) => r.id);
-      const next = mainSelection.length === allIds.length ? [] : allIds;
+      const isAllVisibleChecked = visibleIds.every((rowId) => mainSelection.includes(rowId));
+      const next = isAllVisibleChecked
+        ? mainSelection.filter((rowId) => !visibleIds.includes(rowId))
+        : Array.from(new Set([...mainSelection, ...visibleIds]));
       handleMainSelection(next);
     } else {
       const next = mainSelection.includes(id)
@@ -369,41 +386,102 @@ export default function App() {
     return () => clearTimeout(t);
   }, [toastOpen]);
 
+  const shellSx = {
+    background: "#fff",
+    borderRadius: "16px",
+    boxShadow: "0 12px 30px rgba(15, 23, 42, 0.08)",
+    p: { xs: 2, md: 2.5 },
+    border: "1px solid #e5e7eb",
+  };
+
   return (
-    <Box sx={{ p: 2, display: "flex", flexDirection: "column", gap: 3 }}>
-      <Box>
-        <DataGridPro
-          rows={data}
-          columns={columnsWithEdit}
-          columnHeaderHeight={64}
-          rowHeight={32}
-          checkboxSelection
-          disableRowSelectionOnClick
-          rowSelectionModel={mainSelection}
-          onRowSelectionModelChange={handleMainSelection}
-          processRowUpdate={processMainRowUpdate}
-          getRowClassName={mainRowClass}
-          getCellClassName={(params) => {
-            if (params.row.section === "Error" && requiredFields.includes(params.field) &&
-              (!params.value || params.value === "입력")) {
-              return "cell-error";
-            }
-            return "";
-          }}
-          onColumnHeaderClick={(params) => {
-            if (params.colDef?.field === "__check__") {
-              toggleMainCheckbox("__all__");
-            }
-          }}
-          onCellClick={(params) => {
-            if (params.field === "__check__") {
-              toggleMainCheckbox(params.id);
-              return;
-            }
-            setFocusedMain(params.id);
-          }}
-          autoHeight
-          sx={{
+    <Box sx={{ minHeight: "100vh", background: "#f7f8fb", p: { xs: 2, md: 3 }, display: "flex", flexDirection: "column", gap: 2 }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2 }}>
+        <Box sx={shellSx}>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: { xs: "flex-start", md: "center" },
+              flexWrap: "wrap",
+              rowGap: 1.5,
+              columnGap: 1,
+              mb: 1.5,
+            }}
+          >
+            <Box>
+              <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#16171b" }}>상태값 가이드 테이블</Typography>
+              <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6b7280", mt: 0.5 }}>
+                Enabled / Focus / Edited / Error 시나리오 참고용
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
+              {filterChips.map((chip) => {
+                const isActive = filter === chip.value;
+                return (
+                  <Box
+                    key={chip.value}
+                    onClick={() => setFilter(chip.value)}
+                    sx={{
+                      cursor: "pointer",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "6px",
+                      px: 1.5,
+                      py: 0.75,
+                      borderRadius: "999px",
+                      border: "1px solid #d7dce4",
+                      background: isActive ? (chip.value === "all" ? "#111827" : "#e5f0ff") : "#f9fafb",
+                      color: isActive && chip.value === "all" ? "#f9fafb" : "#0f172a",
+                      fontSize: 12,
+                      fontWeight: isActive ? 600 : 500,
+                      transition: "all 0.2s ease",
+                    }}
+                  >
+                    <Box sx={{ width: 8, height: 8, borderRadius: "50%", background: chip.dot }} />
+                    {chip.label}
+                  </Box>
+                );
+              })}
+            </Box>
+          </Box>
+
+          <Box sx={{ border: "1px solid #d7dce4", borderRadius: "12px", overflow: "hidden", bgcolor: "#fff" }}>
+            <DataGridPro
+              rows={filteredMainRows}
+              columns={columnsWithEdit}
+              columnHeaderHeight={64}
+              rowHeight={32}
+              checkboxSelection
+              disableRowSelectionOnClick
+              disableColumnMenu
+              hideFooter
+              pinnedColumns={pinnedColumns}
+              rowSelectionModel={mainSelection}
+              onRowSelectionModelChange={handleMainSelection}
+              processRowUpdate={processMainRowUpdate}
+              getRowClassName={mainRowClass}
+              getCellClassName={(params) => {
+                if (params.row.section === "Error" && requiredFields.includes(params.field) &&
+                  (!params.value || params.value === "입력")) {
+                  return "cell-error";
+                }
+                return "";
+              }}
+              onColumnHeaderClick={(params) => {
+                if (params.colDef?.field === "__check__") {
+                  toggleMainCheckbox("__all__");
+                }
+              }}
+              onCellClick={(params) => {
+                if (params.field === "__check__") {
+                  toggleMainCheckbox(params.id);
+                  return;
+                }
+                setFocusedMain(params.id);
+              }}
+              autoHeight
+              sx={{
             fontFamily: "SUIT Variable",
             "& .row-Enabled": { bgcolor: sectionColors.Enabled },
             "& .row-Focus": { bgcolor: sectionColors.Focus },
@@ -426,6 +504,10 @@ export default function App() {
               borderBottom:
                 "1px solid var(--Colors-black_opacity-black_opacity8, rgba(22, 23, 27, 0.08))",
               background: "var(--Colors-yellow-98, #FEF6E6)",
+            },
+            "& .row-Edited .MuiDataGrid-cell--pinnedLeft": {
+              backgroundColor: sectionColors.Edited,
+              backgroundImage: `linear-gradient(0deg, ${overlayGray} 0%, ${overlayGray} 100%)`,
             },
             "& .row-Error .MuiDataGrid-cell": {
               display: "flex",
@@ -453,6 +535,10 @@ export default function App() {
             },
             "& .row-sim-hover .MuiDataGrid-cell": {
               backgroundImage: `linear-gradient(0deg, ${overlayColor} 0%, ${overlayColor} 100%)`,
+            },
+            "& .row-edited-new:hover .MuiDataGrid-cell": {
+              backgroundColor: sectionColors.Edited,
+              backgroundImage: `linear-gradient(0deg, ${overlayGray} 0%, ${overlayGray} 100%)`,
             },
             "& .MuiDataGrid-columnHeaders": {
               bgcolor: "#DEE1E8",
@@ -561,273 +647,235 @@ export default function App() {
             "& .row-sim-hover .MuiDataGrid-cell": {
               backgroundImage: `linear-gradient(0deg, ${overlayColor} 0%, ${overlayColor} 100%)`,
             },
+            "& .row-edited-new:hover .MuiDataGrid-cell": {
+              backgroundColor: sectionColors.Edited,
+              backgroundImage: `linear-gradient(0deg, ${overlayGray} 0%, ${overlayGray} 100%)`,
+            },
           }}
-        />
-      </Box>
-
-      <Box
-        sx={{
-          position: "fixed",
-          top: 24,
-          left: "50%",
-          transform: "translateX(-50%)",
-          pointerEvents: "none",
-          zIndex: 1300,
-          opacity: toastOpen ? 1 : 0,
-          transition: "opacity 0.25s ease, transform 0.25s ease",
-          transformOrigin: "top center",
-          transform: toastOpen ? "translateX(-50%) translateY(0)" : "translateX(-50%) translateY(-10px)",
-        }}
-      >
-        <Box
-          sx={{
-            display: "inline-flex",
-            padding: "12px 24px",
-            justifyContent: "center",
-            alignItems: "center",
-            gap: "8px",
-            borderRadius: "9999px",
-            border: "1px solid var(--Colors-green-50, #11A277)",
-            background: "var(--Colors-green-98, #EDF7F4)",
-            boxShadow: "0 5px 5px rgba(17, 162, 119, 0.15)",
-          }}
-        >
-          <Box
-            component="span"
-            sx={{ display: "inline-flex", width: 20, height: 20, alignItems: "center", justifyContent: "center" }}
-            aria-hidden
-          >
-            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path
-                d="M9.99996 1.66666C5.39996 1.66666 1.66663 5.39999 1.66663 9.99999C1.66663 14.6 5.39996 18.3333 9.99996 18.3333C14.6 18.3333 18.3333 14.6 18.3333 9.99999C18.3333 5.39999 14.6 1.66666 9.99996 1.66666ZM14.9416 7.66666L8.48329 14.1333C8.39996 14.2083 8.26663 14.2083 8.18329 14.1333L5.05829 11C4.98329 10.925 4.98329 10.7917 5.05829 10.7083L5.70829 10.0583C5.79163 9.98332 5.92496 9.98332 5.99996 10.0583L8.39163 12.4417L14 6.72499C14.075 6.64999 14.2083 6.64999 14.2916 6.72499L14.9416 7.37499C15.0166 7.45832 15.0166 7.59166 14.9416 7.66666Z"
-                fill="#11A277"
-              />
-            </svg>
-          </Box>
-          <Box
-            component="span"
-            sx={{
-              color: "#11A277",
-              fontSize: 14,
-              fontFamily: "SUIT Variable",
-              fontWeight: 700,
-              lineHeight: "20px",
-            }}
-          >
-            {toastMessage}
+            />
           </Box>
         </Box>
-      </Box>
 
-      <Box>
-        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
-          <Stack direction="row" spacing={1}>
-            <Button
-              onClick={addRow}
-              startIcon={
-                <Box
-                  component="span"
-                  sx={{
-                    width: 16,
-                    height: 16,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="12"
-                    height="12"
-                    viewBox="0 0 12 12"
-                    fill="none"
-                    aria-hidden="true"
+        <Box sx={shellSx}>
+          <Box sx={{ mb: 1.5 }}>
+            <Typography sx={{ fontSize: 14, fontWeight: 600, color: "#16171b" }}>테스트 플레이그라운드</Typography>
+            <Typography sx={{ fontSize: 12, fontWeight: 500, color: "#6b7280", mt: 0.5 }}>
+              Enabled 상태에서 체크/저장/삭제, 행 추가 → Error/Edited 흐름 테스트
+            </Typography>
+          </Box>
+          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 1 }}>
+            <Stack direction="row" spacing={1}>
+              <Button
+                onClick={addRow}
+                startIcon={
+                  <Box
+                    component="span"
+                    sx={{
+                      width: 16,
+                      height: 16,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
                   >
-                    <path
-                      d="M11.333 0C11.6997 0 12 0.300326 12 0.666992V11.333C12 11.6997 11.6997 12 11.333 12H0.666992C0.300326 12 0 11.6997 0 11.333V0.666992C0 0.300326 0.300326 0 0.666992 0H11.333ZM1.06641 1.06641V10.9336H10.9336V1.06641H1.06641ZM6.36621 2.66699C6.45944 2.66699 6.53303 2.73983 6.5332 2.83301V5.4668H9.16699C9.26017 5.46697 9.33301 5.54056 9.33301 5.63379V6.36621C9.33301 6.45944 9.26017 6.53303 9.16699 6.5332H6.5332V9.16699C6.53303 9.26017 6.45944 9.33301 6.36621 9.33301H5.63379C5.54056 9.33301 5.46697 9.26017 5.4668 9.16699V6.5332H2.83301C2.73983 6.53303 2.66699 6.45944 2.66699 6.36621V5.63379C2.66699 5.54056 2.73983 5.46697 2.83301 5.4668H5.4668V2.83301C5.46697 2.73983 5.54056 2.66699 5.63379 2.66699H6.36621Z"
-                      fill="var(--Colors-primary-40, #4353C1)"
-                    />
-                  </svg>
-                </Box>
-              }
-              variant="outlined"
-              sx={{
-                display: "flex",
-                px: "8px",
-                py: "4px",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: "4px",
-                borderRadius: "6px",
-                border: "1px solid var(--Colors-grey-90, #DEE1E8)",
-                background: "var(--Semantic-Static-white, #FFF)",
-                color: "var(--Colors-grey-40, #636874)",
-                fontFamily: "SUIT Variable",
-                fontSize: 13,
-                fontStyle: "normal",
-                fontWeight: 700,
-                lineHeight: "20px",
-                "&:hover": {
-                  background: "#f5f7fc",
-                  border: "1px solid var(--Colors-grey-90, #DEE1E8)",
-                },
-                "& .MuiButton-startIcon": {
-                  marginRight: 0,
-                  marginLeft: 0,
-                },
-              }}
-            >
-              행 추가
-            </Button>
-            <Button
-              onClick={deleteRows}
-              startIcon={
-                <Box
-                  component="span"
-                  sx={{
-                    width: 16,
-                    height: 16,
-                    display: "inline-flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="12"
-                    height="12"
-                    viewBox="0 0 16 16"
-                    fill="none"
-                    aria-hidden="true"
-                  >
-                    <path
-                      d="M13.333 2C13.6997 2 14 2.30033 14 2.66699V13.333C14 13.6997 13.6997 14 13.333 14H2.66699C2.30033 14 2 13.6997 2 13.333V2.66699C2 2.30033 2.30033 2 2.66699 2H13.333ZM3.06641 3.06641V12.9336H12.9336V3.06641H3.06641ZM11.167 7.4668C11.2589 7.46697 11.333 7.54185 11.333 7.63379V8.36621C11.333 8.45815 11.2589 8.53303 11.167 8.5332H4.83301C4.74111 8.53303 4.66699 8.45815 4.66699 8.36621V7.63379C4.66699 7.54185 4.74111 7.46697 4.83301 7.4668H11.167Z"
-                      fill="#DC2F0C"
-                    />
-                  </svg>
-                </Box>
-              }
-              variant="outlined"
-              sx={{
-                display: "flex",
-                px: "8px",
-                py: "4px",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: "4px",
-                borderRadius: "6px",
-                border: "1px solid var(--Colors-grey-90, #DEE1E8)",
-                background: "var(--Semantic-Static-white, #FFF)",
-                color: "var(--Colors-grey-40, #636874)",
-                fontFamily: "SUIT Variable",
-                fontSize: 13,
-                fontStyle: "normal",
-                fontWeight: 700,
-                lineHeight: "20px",
-                "&:hover": {
-                  background: "#f5f7fc",
-                  border: "1px solid var(--Colors-grey-90, #DEE1E8)",
-                },
-                "& .MuiButton-startIcon": {
-                  marginRight: 0,
-                  marginLeft: 0,
-                },
-              }}
-            >
-              행 삭제
-            </Button>
-          </Stack>
-          <Button
-            onClick={saveRows}
-            startIcon={
-              <Box
-                component="span"
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 12 12"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M11.333 0C11.6997 0 12 0.300326 12 0.666992V11.333C12 11.6997 11.6997 12 11.333 12H0.666992C0.300326 12 0 11.6997 0 11.333V0.666992C0 0.300326 0.300326 0 0.666992 0H11.333ZM1.06641 1.06641V10.9336H10.9336V1.06641H1.06641ZM6.36621 2.66699C6.45944 2.66699 6.53303 2.73983 6.5332 2.83301V5.4668H9.16699C9.26017 5.46697 9.33301 5.54056 9.33301 5.63379V6.36621C9.33301 6.45944 9.26017 6.53303 9.16699 6.5332H6.5332V9.16699C6.53303 9.26017 6.45944 9.33301 6.36621 9.33301H5.63379C5.54056 9.33301 5.46697 9.26017 5.4668 9.16699V6.5332H2.83301C2.73983 6.53303 2.66699 6.45944 2.66699 6.36621V5.63379C2.66699 5.54056 2.73983 5.46697 2.83301 5.4668H5.4668V2.83301C5.46697 2.73983 5.54056 2.66699 5.63379 2.66699H6.36621Z"
+                        fill="var(--Colors-primary-40, #4353C1)"
+                      />
+                    </svg>
+                  </Box>
+                }
+                variant="outlined"
                 sx={{
-                  width: 16,
-                  height: 16,
-                  display: "inline-flex",
-                  alignItems: "center",
+                  display: "flex",
+                  px: "8px",
+                  py: "4px",
                   justifyContent: "center",
+                  alignItems: "center",
+                  gap: "4px",
+                  borderRadius: "6px",
+                  border: "1px solid var(--Colors-grey-90, #DEE1E8)",
+                  background: "var(--Semantic-Static-white, #FFF)",
+                  color: "var(--Colors-grey-40, #636874)",
+                  fontFamily: "SUIT Variable",
+                  fontSize: 13,
+                  fontStyle: "normal",
+                  fontWeight: 700,
+                  lineHeight: "20px",
+                  "&:hover": {
+                    background: "#f5f7fc",
+                    border: "1px solid var(--Colors-grey-90, #DEE1E8)",
+                  },
+                  "& .MuiButton-startIcon": {
+                    marginRight: 0,
+                    marginLeft: 0,
+                  },
                 }}
               >
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="12"
-                  height="12"
-                  viewBox="0 0 11 8"
-                  fill="none"
-                  aria-hidden="true"
+                행 추가
+              </Button>
+              <Button
+                onClick={deleteRows}
+                startIcon={
+                  <Box
+                    component="span"
+                    sx={{
+                      width: 16,
+                      height: 16,
+                      display: "inline-flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      width="12"
+                      height="12"
+                      viewBox="0 0 16 16"
+                      fill="none"
+                      aria-hidden="true"
+                    >
+                      <path
+                        d="M13.333 2C13.6997 2 14 2.30033 14 2.66699V13.333C14 13.6997 13.6997 14 13.333 14H2.66699C2.30033 14 2 13.6997 2 13.333V2.66699C2 2.30033 2.30033 2 2.66699 2H13.333ZM3.06641 3.06641V12.9336H12.9336V3.06641H3.06641ZM11.167 7.4668C11.2589 7.46697 11.333 7.54185 11.333 7.63379V8.36621C11.333 8.45815 11.2589 8.53303 11.167 8.5332H4.83301C4.74111 8.53303 4.66699 8.45815 4.66699 8.36621V7.63379C4.66699 7.54185 4.74111 7.46697 4.83301 7.4668H11.167Z"
+                        fill="#DC2F0C"
+                      />
+                    </svg>
+                  </Box>
+                }
+                variant="outlined"
+                sx={{
+                  display: "flex",
+                  px: "8px",
+                  py: "4px",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: "4px",
+                  borderRadius: "6px",
+                  border: "1px solid var(--Colors-grey-90, #DEE1E8)",
+                  background: "var(--Semantic-Static-white, #FFF)",
+                  color: "var(--Colors-grey-40, #636874)",
+                  fontFamily: "SUIT Variable",
+                  fontSize: 13,
+                  fontStyle: "normal",
+                  fontWeight: 700,
+                  lineHeight: "20px",
+                  "&:hover": {
+                    background: "#f5f7fc",
+                    border: "1px solid var(--Colors-grey-90, #DEE1E8)",
+                  },
+                  "& .MuiButton-startIcon": {
+                    marginRight: 0,
+                    marginLeft: 0,
+                  },
+                }}
+              >
+                행 삭제
+              </Button>
+            </Stack>
+            <Button
+              onClick={saveRows}
+              startIcon={
+                <Box
+                  component="span"
+                  sx={{
+                    width: 16,
+                    height: 16,
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
                 >
-                  <path
-                    d="M3.88333 7.28347L0.05 3.46056C-0.0166667 3.39408 -0.0166667 3.29435 0.05 3.22786L0.57 2.70928C0.636666 2.64279 0.736666 2.64279 0.803333 2.70928L4.04333 5.94047L9.86333 0.049864C9.93 -0.0166213 10.03 -0.0166213 10.0967 0.049864L10.6167 0.56845C10.6833 0.634935 10.6833 0.734663 10.6167 0.801149L4.11667 7.28347C4.05 7.34996 3.95 7.34996 3.88333 7.28347Z"
-                    fill="var(--Semantic-Static-white, #FFF)"
-                  />
-                </svg>
-              </Box>
-            }
-            variant="contained"
-            sx={{
-              display: "flex",
-              px: "8px",
-              py: "4px",
-              justifyContent: "center",
-              alignItems: "center",
-              gap: "4px",
-              borderRadius: "6px",
-              background: "var(--Colors-blue-50, #287EFF)",
-              boxShadow: "none",
-              fontFamily: "SUIT Variable",
-              fontSize: 13,
-              fontStyle: "normal",
-              fontWeight: 700,
-              lineHeight: "20px",
-              textAlign: "center",
-              textTransform: "none",
-              color: "var(--Semantic-Static-white, #FFF)",
-              "& .MuiButton-startIcon": {
-                marginRight: 0,
-                marginLeft: 0,
-              },
-              "&:hover": {
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="12"
+                    height="12"
+                    viewBox="0 0 11 8"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <path
+                      d="M3.88333 7.28347L0.05 3.46056C-0.0166667 3.39408 -0.0166667 3.29435 0.05 3.22786L0.57 2.70928C0.636666 2.64279 0.736666 2.64279 0.803333 2.70928L4.04333 5.94047L9.86333 0.049864C9.93 -0.0166213 10.03 -0.0166213 10.0967 0.049864L10.6167 0.56845C10.6833 0.634935 10.6833 0.734663 10.6167 0.801149L4.11667 7.28347C4.05 7.34996 3.95 7.34996 3.88333 7.28347Z"
+                      fill="var(--Semantic-Static-white, #FFF)"
+                    />
+                  </svg>
+                </Box>
+              }
+              variant="contained"
+              sx={{
+                display: "flex",
+                px: "8px",
+                py: "4px",
+                justifyContent: "center",
+                alignItems: "center",
+                gap: "4px",
+                borderRadius: "6px",
                 background: "var(--Colors-blue-50, #287EFF)",
-              },
-            }}
-          >
-            등록
-          </Button>
-        </Stack>
+                boxShadow: "none",
+                fontFamily: "SUIT Variable",
+                fontSize: 13,
+                fontStyle: "normal",
+                fontWeight: 700,
+                lineHeight: "20px",
+                textAlign: "center",
+                textTransform: "none",
+                color: "var(--Semantic-Static-white, #FFF)",
+                "& .MuiButton-startIcon": {
+                  marginRight: 0,
+                  marginLeft: 0,
+                },
+                "&:hover": {
+                  background: "var(--Colors-blue-50, #287EFF)",
+                },
+              }}
+            >
+              등록
+            </Button>
+          </Stack>
 
-        <DataGridPro
-          rows={playgroundRows}
-          columns={columnsWithEdit}
-          columnHeaderHeight={64}
-          rowHeight={32}
-          checkboxSelection
-          disableRowSelectionOnClick
-          onRowSelectionModelChange={handlePlaygroundSelection}
-          rowSelectionModel={selection}
-          processRowUpdate={processPlaygroundRowUpdate}
-          getCellClassName={(params) => {
-            if (params.row.section === "Error" && requiredFields.includes(params.field) &&
-              (!params.value || params.value === "입력")) {
-              return "cell-error";
-            }
-            return "";
-          }}
-          onColumnHeaderClick={(params) => {
-            if (params.colDef?.field === "__check__") {
-              togglePlaygroundCheckbox("__all__");
-            }
-          }}
-          onCellClick={(params) => {
-            if (params.field === "__check__") {
-              togglePlaygroundCheckbox(params.id);
-              return;
-            }
-            setFocusedPlayground(params.id);
-          }}
-          getRowClassName={playgroundRowClass}
-          sx={{
+          <Box sx={{ border: "1px solid #d7dce4", borderRadius: "12px", overflow: "hidden", bgcolor: "#fff" }}>
+            <DataGridPro
+              rows={playgroundRows}
+              columns={columnsWithEdit}
+              columnHeaderHeight={64}
+              rowHeight={32}
+              checkboxSelection
+              disableRowSelectionOnClick
+              disableColumnMenu
+              hideFooter
+              pinnedColumns={pinnedColumns}
+              onRowSelectionModelChange={handlePlaygroundSelection}
+              rowSelectionModel={selection}
+              processRowUpdate={processPlaygroundRowUpdate}
+              getCellClassName={(params) => {
+                if (params.row.section === "Error" && requiredFields.includes(params.field) &&
+                  (!params.value || params.value === "입력")) {
+                  return "cell-error";
+                }
+                return "";
+              }}
+              onColumnHeaderClick={(params) => {
+                if (params.colDef?.field === "__check__") {
+                  togglePlaygroundCheckbox("__all__");
+                }
+              }}
+              onCellClick={(params) => {
+                if (params.field === "__check__") {
+                  togglePlaygroundCheckbox(params.id);
+                  return;
+                }
+                setFocusedPlayground(params.id);
+              }}
+              getRowClassName={playgroundRowClass}
+              autoHeight
+              sx={{
             fontFamily: "SUIT Variable",
             "& .row-Enabled": { bgcolor: sectionColors.Enabled },
             "& .row-Focus": { bgcolor: sectionColors.Focus },
@@ -983,11 +1031,66 @@ export default function App() {
               backgroundColor: sectionColors.Error,
               backgroundImage: `linear-gradient(0deg, ${overlayColor} 0%, ${overlayColor} 100%)`,
             },
-            height: 500,
           }}
-        />
-        <Box sx={{ mt: 1, display: "flex", justifyContent: "flex-end", fontFamily: "SUIT Variable", fontSize: 13, fontWeight: 500, color: "#16171B" }}>
-          합계: {playgroundRows.length}건
+            />
+          </Box>
+          <Box sx={{ mt: 1, display: "flex", justifyContent: "flex-end", fontFamily: "SUIT Variable", fontSize: 13, fontWeight: 600, color: "#16171B" }}>
+            합계: {playgroundRows.length}건
+          </Box>
+        </Box>
+      </Box>
+
+      <Box
+        sx={{
+          position: "fixed",
+          top: 24,
+          left: "50%",
+          transform: "translateX(-50%)",
+          pointerEvents: "none",
+          zIndex: 1300,
+          opacity: toastOpen ? 1 : 0,
+          transition: "opacity 0.25s ease, transform 0.25s ease",
+          transformOrigin: "top center",
+          transform: toastOpen ? "translateX(-50%) translateY(0)" : "translateX(-50%) translateY(-10px)",
+        }}
+      >
+        <Box
+          sx={{
+            display: "inline-flex",
+            padding: "12px 24px",
+            justifyContent: "center",
+            alignItems: "center",
+            gap: "8px",
+            borderRadius: "9999px",
+            border: "1px solid var(--Colors-green-50, #11A277)",
+            background: "var(--Colors-green-98, #EDF7F4)",
+            boxShadow: "0 5px 5px rgba(17, 162, 119, 0.15)",
+          }}
+        >
+          <Box
+            component="span"
+            sx={{ display: "inline-flex", width: 20, height: 20, alignItems: "center", justifyContent: "center" }}
+            aria-hidden
+          >
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M9.99996 1.66666C5.39996 1.66666 1.66663 5.39999 1.66663 9.99999C1.66663 14.6 5.39996 18.3333 9.99996 18.3333C14.6 18.3333 18.3333 14.6 18.3333 9.99999C18.3333 5.39999 14.6 1.66666 9.99996 1.66666ZM14.9416 7.66666L8.48329 14.1333C8.39996 14.2083 8.26663 14.2083 8.18329 14.1333L5.05829 11C4.98329 10.925 4.98329 10.7917 5.05829 10.7083L5.70829 10.0583C5.79163 9.98332 5.92496 9.98332 5.99996 10.0583L8.39163 12.4417L14 6.72499C14.075 6.64999 14.2083 6.64999 14.2916 6.72499L14.9416 7.37499C15.0166 7.45832 15.0166 7.59166 14.9416 7.66666Z"
+                fill="#11A277"
+              />
+            </svg>
+          </Box>
+          <Box
+            component="span"
+            sx={{
+              color: "#11A277",
+              fontSize: 14,
+              fontFamily: "SUIT Variable",
+              fontWeight: 700,
+              lineHeight: "20px",
+            }}
+          >
+            {toastMessage}
+          </Box>
         </Box>
       </Box>
     </Box>
